@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static%}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+{% include "include/navbar.html" %}
+<div class="text-center my-5">
+    <h2>About JobFlick</h2>
+    <p class="lead mx-auto" style="max-width:700px;">
+        JobFlick is a modern job platform designed to connect employers with the right candidates quickly and efficiently. Whether you're looking for skilled workers or searching for your next career opportunity, JobFlick makes the process simple, transparent, and effective.
+    </p>
+</div>
+
+<div class="row justify-content-center mb-5">
+    <!-- Our Mission -->
+    <div class="col-md-5 mb-3">
+        <div class="p-4 rounded shadow-sm" style="background-color:#e6f0ff;">
+            <h5 class="text-primary font-weight-bold">Our Mission</h5>
+            <p>To empower job seekers and employers by providing a platform that bridges the gap between opportunity and talent with ease and trust.</p>
+        </div>
+    </div>
+
+    <!-- Our Vision -->
+    <div class="col-md-5 mb-3">
+        <div class="p-4 rounded shadow-sm" style="background-color:#e6ffe6;">
+            <h5 class="text-success font-weight-bold">Our Vision</h5>
+            <p>To become the most reliable and user-friendly job marketplace in the region, promoting fairness and opportunity for everyone.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Optional: Add a center image -->
+<div class="text-center mb-5">
+    <img src="{% static 'images/logo.png' %}" alt="About JobFlick" class="img-fluid" style="max-width:400px; border-radius:10px;">
+</div>
+
+<div class="text-center text-muted mb-4">
+    &copy; 2025 JobFlick. All rights reserved.
+</div>
+{% endblock %}

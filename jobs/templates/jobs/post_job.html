@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Post a Job{% endblock %}
+
+{% block content %}
+{%include "include/navbar.html"%}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Post Your Job</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <!-- Work Title -->
+                    <div class="form-group">
+                        <label for="work_title">Work Title</label>
+                        <input type="text" class="form-control" id="work_title" name="work_title" placeholder="e.g. Web Developer Needed" required>
+                    </div>
+
+                    <!-- Worker Type -->
+                    <div class="form-group">
+                        <label for="worker_type">Worker Type</label>
+                        <input type="text" class="form-control" id="worker_type" name="worker_type" placeholder="e.g. Designer, Developer, Electrician" required>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="form-group">
+                        <label for="duration">Duration</label>
+                        <input type="text" class="form-control" id="duration" name="duration" placeholder="e.g. 3 days, 2 weeks" required>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-group">
+                        <label for="amount">Amount (BDT)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" placeholder="e.g. 15000" required>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" placeholder="e.g. Dhaka, Bangladesh" required>
+                    </div>
+
+                    <!-- Required Skill -->
+                    <div class="form-group">
+                        <label for="skills">Required Skill</label>
+                        <input type="text" class="form-control" id="skills" name="skills" placeholder="e.g. JavaScript, React, UI Design" required>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success btn-block">Post Job</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
