@@ -1,53 +1,53 @@
 {% load static %}
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light pl-5 pr-5">
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+  <!-- Logo -->
+  <a class="navbar-brand" href="{% url 'home' %}">
+    <img src="{% static 'images/logo.png' %}" alt="logo" width="50">
+  </a>
 
-  <img src="{% static 'images/logo.png' %}" alt="logo" width="50">
-
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+  <!-- Toggler -->
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
-  <div class="collapse navbar-collapse pl-5" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-
+  <!-- Navbar Items -->
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto mt-3 mt-lg-0">
       <li class="nav-item active">
         <a class="nav-link" href="{% url 'home' %}">Home</a>
       </li>
-
       <li class="nav-item">
         <a class="nav-link" href="{% url 'post_job' %}">Post a Job</a>
       </li>
-
       <li class="nav-item">
         <a class="nav-link" href="#">Find CVs</a>
       </li>
-
       <li class="nav-item">
         <a class="nav-link" href="{% url 'about' %}">About Us</a>
       </li>
-
       <li class="nav-item">
         <a class="nav-link" href="{% url 'contact' %}">Contact Us</a>
       </li>
-
     </ul>
 
-    <!-- Search form -->
+    <!-- Search Form -->
     <form class="form-inline my-2 my-lg-0 mr-3">
       <input class="form-control mr-sm-2" type="search" placeholder="Search">
       <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
     </form>
 
     <!-- Login / Signup Buttons -->
-    <div>
-      {% if user.is_authenticated %}
-          <a href="{% url 'logout' %}" class="btn btn-danger ml-2">Logout</a>
-      {% else %}
-          <a href="{% url 'login' %}" class="btn btn-outline-primary ml-2">Login</a>
-          <a href="{% url 'signup' %}" class="btn btn-primary ml-2">Sign Up</a>
-      {% endif %}
-    </div>
+    <!-- Login / Signup Buttons -->
+<div class="d-flex flex-column flex-lg-row align-items-start">
+  {% if user.is_authenticated %}
+    <a href="{% url 'logout' %}" class="btn btn-danger mb-2 mb-lg-0 me-lg-2 btn-sm">Logout</a>
+  {% else %}
+    <a href="{% url 'login' %}" class="btn btn-outline-primary mb-2 mb-lg-0 me-lg-2 btn-sm">Login</a>
+    <a href="{% url 'signup' %}" class="btn btn-primary btn-sm">Sign Up</a>
+  {% endif %}
+</div>
 
   </div>
 </nav>
