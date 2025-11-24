@@ -9,8 +9,13 @@
 
     <h2 class="text-2xl font-bold mb-4">Login</h2>
 
-    {% if error %}
-        <p class="text-red-500">{{ error }}</p>
+    <!-- Only text message (no popup) -->
+    {% if messages %}
+        {% for message in messages %}
+            <p class="text-red-600 font-medium mb-3">
+                {{ message }}
+            </p>
+        {% endfor %}
     {% endif %}
 
     <form method="POST">

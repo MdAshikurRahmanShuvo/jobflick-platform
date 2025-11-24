@@ -1,0 +1,49 @@
+# Django specific
+*.pyc
+__pycache__/
+*/migrations/__pycache__/
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# SQLite database
+*.sqlite3
+*.db
+
+# Environment
+.env
+venv/
+ENV/
+.env.local
+
+# Static & Media
+staticfiles/
+media/
+
+# IDE & System
+.idea/
+.vscode/
+*.log
+.DS_Store
+
+# Python cache
+*.pyo
+*.pyd
+*.pdb
+
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*$py.class
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# pip
+pip-wheel-metadata/
