@@ -7,30 +7,39 @@ from .forms import SignupForm
 # ---------- SIGNUP ----------
 def signup_view(request):
     if request.method == "POST":
-        form = SignupForm(request.POST)
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
 
-        if form.is_valid():
-            email = form.cleaned_data["email"]
+        # Password match check
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+            return redirect("signup")
 
-            # Check duplicate email
-            if User.objects.filter(email=email).exists():
-                messages.error(request, "This email is already registered! Try another one.")
-                return redirect("signup")
+        # Duplicate username check
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "This username is already taken! Try another one.")
+            return redirect("signup")
 
-            user = User.objects.create_user(
-                username=form.cleaned_data["username"],
-                email=email,
-                password=form.cleaned_data["password"]
-            )
+        # Duplicate email check
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "This email is already registered!")
+            return redirect("signup")
 
-            login(request, user)
-            messages.success(request, "Signup successful!")
-            return redirect('home')
+        # Create user
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
 
-    else:
-        form = SignupForm()
+        login(request, user)
+        messages.success(request, "Signup successful!")
+        return redirect("home")
 
-    return render(request, 'accounts/signup.html', {'form': form})
+    return render(request, "accounts/signup.html")
+
 
 
 # ---------- LOGIN ----------
