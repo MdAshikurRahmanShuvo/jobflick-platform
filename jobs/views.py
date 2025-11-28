@@ -23,7 +23,7 @@ def post_job(request):
             return redirect("user-dashboard")
     else:
         form = JobForm()
-    return render(request, "jobs/post_job.html", {"form": form, "profile": profile})
+    return render(request, "jobs/post_job.html", {"form": form, "profile": profile, "hide_nav": True})
 
 
 @login_required
@@ -31,4 +31,4 @@ def post_job(request):
 def job_list(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     jobs = Job.objects.all()
-    return render(request, "jobs/job_list.html", {"jobs": jobs, "profile": profile})
+    return render(request, "jobs/job_list.html", {"jobs": jobs, "profile": profile, "hide_nav": True})

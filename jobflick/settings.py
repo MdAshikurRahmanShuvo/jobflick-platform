@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'jobflick.middleware.AutoLogoutMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -140,6 +141,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'auth.User'
 
 LOGIN_REDIRECT_URL = 'user-dashboard'
+
+# Session control: auto-logout after 1 hour of inactivity
+SESSION_COOKIE_AGE = 3600  # seconds
+SESSION_SAVE_EVERY_REQUEST = True
+AUTO_LOGOUT_DELAY = 3600
 
 # Email Backend Settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
