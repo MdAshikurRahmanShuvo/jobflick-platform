@@ -1,0 +1,30 @@
+{% extends "userprofile/layout.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="text-center my-4">
+  <h2>About JobFlick</h2>
+  <p class="lead mx-auto" style="max-width:700px;">
+    JobFlick is a modern job platform designed to connect employers with the right candidates quickly and efficiently.
+  </p>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="p-4 bg-light rounded-3 h-100">
+      <h5 class="text-primary">Our Mission</h5>
+      <p>Empower job seekers and employers with a platform that bridges opportunity and talent with trust.</p>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="p-4 bg-light rounded-3 h-100">
+      <h5 class="text-success">Our Vision</h5>
+      <p>Become the most reliable and user-friendly job marketplace in the region.</p>
+    </div>
+  </div>
+</div>
+
+<div class="text-center mb-4">
+  <img src="{% static 'images/logo.png' %}" alt="About JobFlick" class="img-fluid" style="max-width:300px;">
+</div>
+{% endblock %}
