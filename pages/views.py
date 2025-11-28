@@ -1,12 +1,16 @@
 from django.shortcuts import render
 
+from jobs.models import Job
+
 
 def _page_context(request):
-    return {"hide_nav": request.GET.get("embed") == "1"}
+    embed_mode = request.GET.get("embed") == "1"
+    return {"hide_nav": embed_mode, "hide_footer": embed_mode}
 
 
 def home(request):
-    return render(request, 'pages/home.html')
+    jobs = Job.objects.select_related("poster")[:6]
+    return render(request, 'pages/home.html', {"featured_jobs": jobs})
 
 
 def about(request):
