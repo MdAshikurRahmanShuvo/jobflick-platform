@@ -2,79 +2,144 @@
 
 {% block content %}
 <style>
-  .container.mt-4 {
-    max-width: 100%;
-    padding: 0;
-  }
   body {
-    background: #f4f6fb;
+    background: #eef2fb;
+  }
+  .dashboard-shell-wrapper {
+    position: relative;
+    padding-left: 3rem;
   }
   .dashboard-shell {
     display: flex;
     min-height: calc(100vh - 40px);
+    position: relative;
+    overflow: visible;
+    background: #fff;
+    border-radius: 0;
+    border: 1px solid rgba(14, 23, 41, 0.05);
+    box-shadow: 0 35px 60px rgba(15, 39, 90, 0.08);
   }
   .sidebar {
-    width: 250px;
-    background: #0d1626;
-    color: #fff;
-    transition: transform 0.3s ease;
-  }
-  .sidebar.collapsed {
-    transform: translateX(-100%);
+    width: 310px;
+    background: linear-gradient(180deg, #071939 0%, #0f2b57 65%, #0b193a 100%);
+    color: #dce4ff;
+    transition: transform 0.35s ease;
+    z-index: 1040;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: -330px;
+    transform: translateX(0);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1.5rem 3rem rgba(8, 17, 37, 0.5);
   }
   .sidebar h3 {
-    padding: 1.25rem 1.5rem;
+    padding: 1.75rem 2rem 1.25rem;
     margin: 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    font-size: 1.1rem;
-    letter-spacing: 0.02em;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .sidebar nav {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0 2rem;
+    gap: 0.35rem;
   }
   .sidebar nav a {
-    display: block;
-    padding: 0.85rem 1.5rem;
-    color: rgba(255,255,255,0.85);
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.85rem 2rem;
+    color: rgba(236,240,255,0.85);
     text-decoration: none;
     font-size: 0.95rem;
+    border-left: 3px solid transparent;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
-  .sidebar nav a:hover {
-    background: rgba(255,255,255,0.08);
+  .sidebar nav a::before {
+    content: '•';
+    font-size: 0.5rem;
+    color: rgba(236,240,255,0.7);
+  }
+  .sidebar nav a:hover,
+  .sidebar nav a:focus {
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+    border-left-color: #3f86ff;
   }
   .dashboard-main {
     flex: 1;
-    padding: 2.5rem;
+    padding: 2.5rem 3rem;
+    background: #fbfcff;
   }
   .topbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     margin-bottom: 1.5rem;
   }
   .toggle-btn {
-    border: none;
-    background: #0d1626;
-    color: #fff;
-    padding: 0.5rem 0.9rem;
-    border-radius: 6px;
+    border: 1px solid rgba(19,47,98,0.25);
+    background: #fff;
+    color: #102b58;
+    padding: 0.45rem 0.95rem;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 12px 25px rgba(16,43,88,0.08);
+  }
+  .menu-floating-toggle {
+    position: fixed;
+    top: 1.75rem;
+    left: 15px;
+    transform: none;
+    z-index: 1050;
+    transition: left 0.35s ease;
+  }
+  .dashboard-shell-wrapper.menu-open .menu-floating-toggle {
+    left: calc(310px + 15px);
+  }
+  .dashboard-shell.menu-open .sidebar {
+    transform: translateX(330px);
+  }
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1035;
+  }
+  .dashboard-shell.menu-open .sidebar-overlay {
+    opacity: 1;
+    pointer-events: auto;
   }
   @media (max-width: 991px) {
     .dashboard-shell {
-      position: relative;
+      min-height: calc(100vh - 20px);
     }
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      z-index: 1020;
+    .dashboard-shell-wrapper {
+      padding-left: 0;
     }
-    .dashboard-main {
-      padding: 1.25rem;
+    .menu-floating-toggle {
+      left: 1rem;
+      top: 1rem;
     }
+      .dashboard-main {
+        padding: 1.5rem 1.25rem 2rem;
+      }
   }
 </style>
 
-<div class="dashboard-shell">
-  <aside class="sidebar" id="dashboardSidebar">
+<div class="dashboard-shell-wrapper">
+  <button class="toggle-btn menu-floating-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+  <div class="dashboard-shell">
+    <aside class="sidebar" id="dashboardSidebar">
     <h3>Jobflick Panel</h3>
     <nav>
       <a href="{% url 'user-dashboard' %}">Home</a>
@@ -90,29 +155,59 @@
       <a href="{% url 'logout' %}">Logout</a>
     </nav>
   </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
-  <section class="dashboard-main">
-    <div class="topbar">
-      <button class="toggle-btn" id="menuToggle" aria-label="Toggle navigation">☰</button>
-      <div class="text-end">
+    <section class="dashboard-main">
+      <div class="topbar">
+        <div class="text-end">
         <p class="text-muted small mb-0">Signed in as</p>
         <h5 class="mb-0">{{ profile.user.username }}</h5>
       </div>
     </div>
 
-    {% block dashboard_content %}{% endblock %}
-  </section>
+      {% block dashboard_content %}{% endblock %}
+    </section>
+  </div>
 </div>
 
 <script>
   (function() {
     const toggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('dashboardSidebar');
-    if (toggle && sidebar) {
-      toggle.addEventListener('click', function() {
-        sidebar.classList.toggle('collapsed');
-      });
-    }
+    const overlay = document.getElementById('sidebarOverlay');
+    const shell = document.querySelector('.dashboard-shell');
+    const wrapper = document.querySelector('.dashboard-shell-wrapper');
+
+    const setAriaState = (isOpen) => {
+      toggle?.setAttribute('aria-expanded', String(isOpen));
+      sidebar?.setAttribute('aria-hidden', String(!isOpen));
+    };
+
+    const applyMenuState = (isOpen) => {
+      shell?.classList.toggle('menu-open', isOpen);
+      wrapper?.classList.toggle('menu-open', isOpen);
+      setAriaState(isOpen);
+    };
+
+    const closeSidebar = () => {
+      applyMenuState(false);
+    };
+
+    const toggleSidebar = () => {
+      if (!shell) return;
+      const nextState = !shell.classList.contains('menu-open');
+      applyMenuState(nextState);
+    };
+
+    toggle?.addEventListener('click', toggleSidebar);
+    overlay?.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', (evt) => {
+      if (evt.key === 'Escape' && shell?.classList.contains('menu-open')) {
+        closeSidebar();
+      }
+    });
+
+    setAriaState(false);
   })();
 </script>
 {% endblock %}
