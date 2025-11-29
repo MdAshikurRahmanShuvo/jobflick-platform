@@ -8,10 +8,14 @@
 {% if jobs %}
   <div class="row">
     {% for job in jobs %}
+    {% with application=job.app_for_user|first %}
     <div class="col-md-6 mb-3">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
-          <h5 class="card-title">{{ job.work_title }}</h5>
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title mb-0">{{ job.work_title }}</h5>
+            <span class="badge badge-light text-dark">{{ job.tracking_code }}</span>
+          </div>
           <p class="text-muted small mb-1"><strong>Worker Type:</strong> {{ job.worker_type }}</p>
           <p class="text-muted small mb-1"><strong>Duration:</strong> {{ job.duration }}</p>
           <p class="text-muted small mb-1"><strong>Budget:</strong> {{ job.amount }} BDT</p>
@@ -19,11 +23,33 @@
           <p class="text-muted small mb-0"><strong>Skills:</strong> {{ job.skills }}</p>
         </div>
         <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-          <span class="small text-muted">Posted {{ job.created_at|timesince }} ago</span>
-          <span class="badge badge-light">{{ job.poster.username }}</span>
+          <div class="small text-muted">
+            <div>Posted {{ job.created_at|timesince }} ago</div>
+            <div>by {{ job.poster.username }}</div>
+          </div>
+          <div>
+            {% if job.poster_id == request.user.id %}
+              <span class="badge badge-secondary">You posted this</span>
+            {% elif application %}
+              {% if application.status == 'approved' %}
+                <span class="badge badge-success">Approved</span>
+              {% elif application.status == 'pending' %}
+                <span class="badge badge-warning text-dark">Pending</span>
+              {% else %}
+                <span class="badge badge-danger">Rejected</span>
+              {% endif %}
+            {% else %}
+              <form method="post" action="{% url 'apply_to_job' job.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="redirect_to" value="{{ request.path }}">
+                <button class="btn btn-outline-primary btn-sm" type="submit">Apply</button>
+              </form>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
+    {% endwith %}
     {% endfor %}
   </div>
 {% else %}

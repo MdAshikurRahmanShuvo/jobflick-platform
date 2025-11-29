@@ -1,9 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
 
-from jobs.models import Job
+from jobs.models import Job, JobApplication
 
 from .forms import UserProfileForm
 from .models import UserProfile
@@ -14,7 +15,13 @@ from .models import UserProfile
 def dashboard_view(request):
 	profile, _ = UserProfile.objects.get_or_create(user=request.user)
 	skills = [skill.strip() for skill in profile.skills.split(",") if skill.strip()]
-	jobs = Job.objects.all()
+	jobs = Job.objects.prefetch_related(
+		Prefetch(
+			"applications",
+			queryset=JobApplication.objects.filter(applicant=request.user),
+			to_attr="app_for_user",
+		)
+	)
 	context = {
 		"profile": profile,
 		"skills": skills,
@@ -81,5 +88,18 @@ def dashboard_contact_view(request):
 def transactions_view(request):
 	profile, _ = UserProfile.objects.get_or_create(user=request.user)
 	return render(request, "userprofile/transactions_placeholder.html", {"profile": profile, "hide_nav": True})
+
+
+@login_required
+@never_cache
+def notifications_view(request):
+	profile, _ = UserProfile.objects.get_or_create(user=request.user)
+	notifications = request.user.notifications.all()
+	request.user.notifications.filter(is_read=False).update(is_read=True)
+	return render(
+		request,
+		"userprofile/notifications.html",
+		{"profile": profile, "hide_nav": True, "notifications": notifications},
+	)
 
 # Create your views here.

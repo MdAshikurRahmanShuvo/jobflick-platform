@@ -146,6 +146,14 @@
       <a href="{% url 'userprofile-edit' %}">Edit Profile</a>
       <a href="{% url 'post_job' %}">Post a Job</a>
       <a href="{% url 'job_list' %}">Apply for Jobs</a>
+      <a href="{% url 'userprofile-notifications' %}">Notifications
+        {% if unread_notifications_count %}
+          <span class="badge badge-light ml-2">{{ unread_notifications_count }}</span>
+        {% endif %}
+      </a>
+      {% if request.user.is_staff %}
+      <a href="{% url 'manage_job_applications' %}">Manage Applications</a>
+      {% endif %}
       <a href="{% url 'userprofile-transactions' %}">Transactions</a>
       <a href="{% url 'userprofile-chat' %}">Chat</a>
       <a href="{% url 'userprofile-activity' %}">Activity History</a>

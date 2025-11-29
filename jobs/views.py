@@ -1,12 +1,15 @@
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.cache import never_cache
 
 from userprofile.models import UserProfile
 
 from .forms import JobForm
-from .models import Job
+from .models import Job, JobApplication
 
 
 @login_required
@@ -30,5 +33,70 @@ def post_job(request):
 @never_cache
 def job_list(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    jobs = Job.objects.all()
+    jobs = Job.objects.prefetch_related(
+        Prefetch(
+            "applications",
+            queryset=JobApplication.objects.filter(applicant=request.user),
+            to_attr="app_for_user",
+        )
+    )
     return render(request, "jobs/job_list.html", {"jobs": jobs, "profile": profile, "hide_nav": True})
+
+
+@login_required
+@never_cache
+def apply_to_job(request, job_id):
+    job = get_object_or_404(Job, pk=job_id)
+    redirect_target = request.POST.get("redirect_to")
+    if redirect_target and not redirect_target.startswith("/"):
+        redirect_target = None
+    if request.method != "POST":
+        return redirect(redirect_target or "job_list")
+    if job.poster_id == request.user.id:
+        messages.error(request, "You cannot apply to a job you posted.")
+        return redirect(redirect_target or "job_list")
+    application, created = JobApplication.objects.get_or_create(
+        job=job,
+        applicant=request.user,
+        defaults={"cover_letter": request.POST.get("cover_letter", "").strip()},
+    )
+    if not created:
+        messages.info(request, "You already applied to this job.")
+    else:
+        messages.success(request, "Application submitted successfully.")
+    return redirect(redirect_target or "job_list")
+
+
+@staff_member_required
+@never_cache
+def manage_applications(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    applications = (
+        JobApplication.objects.select_related("job", "applicant", "decided_by")
+        .order_by("-created_at")
+    )
+    return render(
+        request,
+        "jobs/application_list.html",
+        {"applications": applications, "profile": profile, "hide_nav": True},
+    )
+
+
+@staff_member_required
+@never_cache
+def update_application_status(request, pk):
+    application = get_object_or_404(JobApplication, pk=pk)
+    if request.method != "POST":
+        return redirect("manage_job_applications")
+    action = request.POST.get("action")
+    if action not in {"approve", "reject"}:
+        messages.error(request, "Invalid action.")
+        return redirect("manage_job_applications")
+    application.status = (
+        JobApplication.Status.APPROVED if action == "approve" else JobApplication.Status.REJECTED
+    )
+    application.decided_by = request.user
+    application.decision_at = timezone.now()
+    application.save()
+    messages.success(request, f"Application marked as {application.get_status_display().lower()}.")
+    return redirect("manage_job_applications")

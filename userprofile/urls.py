@@ -10,4 +10,5 @@ urlpatterns = [
     path("help/", views.help_view, name="userprofile-help"),
     path("about/", views.dashboard_about_view, name="userprofile-about"),
     path("contact/", views.dashboard_contact_view, name="userprofile-contact"),
+    path("notifications/", views.notifications_view, name="userprofile-notifications"),
 ]

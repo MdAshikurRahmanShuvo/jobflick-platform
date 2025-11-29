@@ -1,0 +1,31 @@
+{% extends "userprofile/layout.html" %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="h4 mb-0">Notifications</h2>
+    <p class="text-muted mb-0">Latest updates about your job applications.</p>
+  </div>
+</div>
+
+{% if notifications %}
+  <div class="list-group shadow-sm">
+    {% for notification in notifications %}
+      <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+        <div>
+          <p class="mb-1">{{ notification.message }}</p>
+          <small class="text-muted">{{ notification.created_at|date:"M d, Y h:i A" }}</small>
+        </div>
+        {% if notification.link %}
+          <a class="btn btn-sm btn-outline-primary" href="{{ notification.link }}">View</a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-white text-center py-5 rounded shadow-sm">
+    <h5 class="mb-2">You're all caught up</h5>
+    <p class="text-muted mb-0">We'll let you know when there's something new.</p>
+  </div>
+{% endif %}
+{% endblock %}
