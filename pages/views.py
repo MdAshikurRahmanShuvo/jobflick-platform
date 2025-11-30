@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from jobs.models import Job
 
@@ -9,6 +9,8 @@ def _page_context(request):
 
 
 def home(request):
+    if request.user.is_authenticated and not request.user.is_staff:
+        return redirect('user-dashboard')
     jobs = Job.objects.select_related("poster")[:6]
     return render(request, 'pages/home.html', {"featured_jobs": jobs})
 

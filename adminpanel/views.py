@@ -42,8 +42,9 @@ def staff_required(view_func):
 
 
 def login_view(request):
-	if request.user.is_authenticated and request.user.is_staff:
-		return redirect("adminpanel-dashboard")
+	if request.user.is_authenticated:
+		# Always force a fresh sign-in so previous sessions cannot auto-resume
+		logout(request)
 	form = AdminLoginForm(request.POST or None)
 	if request.method == "POST" and form.is_valid():
 		user = form.cleaned_data["user"]
