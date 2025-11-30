@@ -1,0 +1,197 @@
+{% extends "adminpanel/layout.html" %}
+
+{% block adminpanel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <p class="text-muted small mb-1">Jobflick Admin Panel</p>
+    <h1 class="h4 mb-1">{{ section_title }}</h1>
+    <p class="text-muted mb-0">{{ section_subtitle }}</p>
+  </div>
+  <div class="text-end">
+    <p class="text-muted small mb-0">Signed in as</p>
+    <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+  </div>
+</div>
+
+{% if section == 'users' %}
+  <div class="admin-table-scroll">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Date Joined</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.date_joined|date:"M d, Y" }}</td>
+          <td class="text-end">
+            {% if user != request.user %}
+            <form method="post" action="{% url 'adminpanel-delete-user' user.id %}">
+              {% csrf_token %}
+              <button class="btn btn-link text-danger p-0" title="Delete" onclick="return confirm('Delete this user?')">
+                <span aria-hidden="true">🗑️</span>
+              </button>
+            </form>
+            {% else %}
+            <span class="badge badge-light">You</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center text-muted">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif section == 'jobs' %}
+  <div class="admin-table-scroll">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Title</th>
+          <th>Poster</th>
+          <th>Created</th>
+          <th>Tracking</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+        <tr>
+          <td>
+            <div class="fw-semibold">{{ job.work_title }}</div>
+            <small class="text-muted">{{ job.worker_type }} · {{ job.location }}</small>
+          </td>
+          <td>{{ job.poster.username }}</td>
+          <td>{{ job.created_at|date:"M d, Y" }}</td>
+          <td>{{ job.tracking_code }}</td>
+          <td class="text-end">
+            <form method="post" action="{% url 'adminpanel-delete-job' job.id %}">
+              {% csrf_token %}
+              <button class="btn btn-link text-danger p-0" onclick="return confirm('Delete this job post?')">🗑️</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">No job posts available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif section == 'approvals' %}
+  <div class="admin-table-scroll">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Job</th>
+          <th>Applicant</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in applications %}
+        <tr>
+          <td>
+            <div class="fw-semibold">{{ app.job.work_title }}</div>
+            <small class="text-muted">{{ app.job.tracking_code }}</small>
+          </td>
+          <td>{{ app.applicant.username }}</td>
+          <td>{{ app.created_at|date:"M d, Y h:i A" }}</td>
+          <td>
+            {% if app.status == 'approved' %}
+              <span class="badge badge-success">Approved</span>
+            {% elif app.status == 'pending' %}
+              <span class="badge badge-warning text-dark">Pending</span>
+            {% else %}
+              <span class="badge badge-danger">Rejected</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            {% if app.status == 'pending' %}
+            <div class="d-inline-flex">
+              <form method="post" action="{% url 'adminpanel-application-status' app.id %}" class="mr-2">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <button class="btn btn-sm btn-success">Approve</button>
+              </form>
+              <form method="post" action="{% url 'adminpanel-application-status' app.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="decline">
+                <button class="btn btn-sm btn-outline-danger">Decline</button>
+              </form>
+            </div>
+            {% else %}
+            <small class="text-muted">{{ app.decision_at|timesince }} ago</small>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">No applications yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif section == 'transactions' %}
+  <div class="mb-4">
+    <div class="p-4 bg-white rounded shadow-sm">
+      <p class="text-muted mb-1">Total Balance</p>
+      <h3 class="mb-0">{{ total_amount|default:0 }} BDT</h3>
+    </div>
+  </div>
+  <div class="admin-table-scroll">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Recipient</th>
+          <th>Job</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for txn in transactions %}
+        <tr>
+          <td>{{ txn.recipient.username }}</td>
+          <td>
+            {% if txn.job %}
+              {{ txn.job.work_title }}
+            {% else %}
+              <span class="text-muted">N/A</span>
+            {% endif %}
+          </td>
+          <td>{{ txn.amount }} BDT</td>
+          <td>
+            {% if txn.status == 'paid' %}
+              <span class="badge badge-success">Paid</span>
+            {% else %}
+              <span class="badge badge-warning text-dark">Pending</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            {% if txn.status != 'paid' %}
+            <form method="post" action="{% url 'adminpanel-mark-transaction-paid' txn.id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-primary">Mark Paid</button>
+            </form>
+            {% else %}
+            <small class="text-muted">{{ txn.processed_at|date:"M d, Y" }}</small>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">No transactions recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

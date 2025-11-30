@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'jobs',
     'accounts',
     'userprofile',
+    'adminpanel',
 ]
 
 MIDDLEWARE = [

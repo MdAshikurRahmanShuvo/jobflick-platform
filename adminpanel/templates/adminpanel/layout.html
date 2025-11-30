@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  body {
+    background: #eef2fb;
+  }
+  .admin-shell-wrapper {
+    position: relative;
+    padding-left: 3rem;
+  }
+  .admin-shell {
+    display: flex;
+    min-height: calc(100vh - 40px);
+    background: #fff;
+    border: 1px solid rgba(14, 23, 41, 0.05);
+    box-shadow: 0 35px 60px rgba(15, 39, 90, 0.08);
+  }
+  .admin-sidebar {
+    width: 300px;
+    background: linear-gradient(180deg, #02142b 0%, #0d274d 70%, #041329 100%);
+    color: #dce4ff;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: -320px;
+    padding-top: 1.5rem;
+    transform: translateX(0);
+    transition: transform 0.35s ease;
+    z-index: 1040;
+  }
+  .admin-shell.menu-open .admin-sidebar {
+    transform: translateX(320px);
+  }
+  .admin-sidebar h3 {
+    margin-left: 2rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.1em;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+  }
+  .admin-sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    color: rgba(236,240,255,0.85);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .admin-sidebar nav a:hover,
+  .admin-sidebar nav a.active {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border-left-color: #3f86ff;
+  }
+  .admin-main {
+    flex: 1;
+    padding: 2.5rem 3rem;
+    background: #fbfcff;
+    margin-left: 300px;
+    width: 100%;
+  }
+  .admin-toggle {
+    border: 1px solid rgba(19,47,98,0.25);
+    background: #fff;
+    color: #102b58;
+    padding: 0.45rem 0.95rem;
+    border-radius: 12px;
+    font-weight: 600;
+    position: fixed;
+    top: 1.75rem;
+    left: 1.5rem;
+    z-index: 1050;
+  }
+  .admin-shell.menu-open + .admin-toggle {
+    left: calc(300px + 1.5rem);
+  }
+  .admin-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1035;
+  }
+  .admin-shell.menu-open ~ .admin-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .admin-section + .admin-section {
+    margin-top: 2rem;
+  }
+  .admin-table-scroll {
+    overflow-x: auto;
+  }
+  @media (max-width: 991px) {
+    .admin-shell-wrapper {
+      padding-left: 0;
+    }
+    .admin-main {
+      margin-left: 0;
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<div class="admin-shell-wrapper" id="adminShellWrapper">
+  <div class="admin-shell" id="adminShell">
+    <aside class="admin-sidebar" id="adminSidebar">
+      <h3>Jobflick Admin Panel</h3>
+      <nav>
+        <a href="{% url 'adminpanel-dashboard' %}?section=users" class="{% if section == 'users' %}active{% endif %}">Users</a>
+        <a href="{% url 'adminpanel-dashboard' %}?section=jobs" class="{% if section == 'jobs' %}active{% endif %}">Jobs</a>
+        <a href="{% url 'adminpanel-dashboard' %}?section=approvals" class="{% if section == 'approvals' %}active{% endif %}">Job Approve</a>
+        <a href="{% url 'adminpanel-dashboard' %}?section=transactions" class="{% if section == 'transactions' %}active{% endif %}">Transactions</a>
+        <a href="{% url 'adminpanel-logout' %}">Logout</a>
+      </nav>
+    </aside>
+    <section class="admin-main">
+      {% if messages %}
+        <div class="mb-3">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block adminpanel_content %}{% endblock %}
+    </section>
+  </div>
+  <button class="admin-toggle" id="adminToggle">☰</button>
+  <div class="admin-overlay" id="adminOverlay"></div>
+</div>
+
+<script>
+  (function(){
+    const shell = document.getElementById('adminShell');
+    const toggle = document.getElementById('adminToggle');
+    const overlay = document.getElementById('adminOverlay');
+    if (!shell || !toggle) return;
+    const closeMenu = () => shell.classList.remove('menu-open');
+    const toggleMenu = () => shell.classList.toggle('menu-open');
+    toggle.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', closeMenu);
+  })();
+</script>
+{% endblock %}

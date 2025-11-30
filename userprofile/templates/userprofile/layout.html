@@ -152,7 +152,7 @@
         {% endif %}
       </a>
       {% if request.user.is_staff %}
-      <a href="{% url 'manage_job_applications' %}">Manage Applications</a>
+      <a href="{% url 'adminpanel-dashboard' %}">Admin Panel</a>
       {% endif %}
       <a href="{% url 'userprofile-transactions' %}">Transactions</a>
       <a href="{% url 'userprofile-chat' %}">Chat</a>

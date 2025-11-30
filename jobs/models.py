@@ -76,12 +76,18 @@ class JobApplication(models.Model):
 				JobApplication.objects.filter(pk=self.pk).values_list("status", flat=True).first()
 			)
 		super().save(*args, **kwargs)
-		if self.status == self.Status.APPROVED and previous_status != self.Status.APPROVED:
+		status_changed = previous_status != self.status
+		if status_changed and self.status in {self.Status.APPROVED, self.Status.REJECTED}:
 			self._notify_applicant()
 
 	def _notify_applicant(self):
 		Notification = apps.get_model("userprofile", "Notification")
-		message = (
-			f"Your application for '{self.job.work_title}' (Tracking {self.job.tracking_code}) has been approved."
-		)
+		if self.status == self.Status.APPROVED:
+			message = (
+				f"Your application for '{self.job.work_title}' (Tracking {self.job.tracking_code}) has been approved."
+			)
+		else:
+			message = (
+				f"Your application for '{self.job.work_title}' (Tracking {self.job.tracking_code}) was declined."
+			)
 		Notification.objects.create(user=self.applicant, message=message)
