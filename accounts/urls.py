@@ -1,6 +1,13 @@
-from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import signup_view, login_view, logout_view
+from django.urls import path
+
+from .views import (
+    NextAwarePasswordResetConfirmView,
+    NextAwarePasswordResetView,
+    login_view,
+    logout_view,
+    signup_view,
+)
 
 urlpatterns = [
     # Authentication
@@ -11,7 +18,7 @@ urlpatterns = [
     # Password Reset Request
     path(
         'password-reset/',
-        auth_views.PasswordResetView.as_view(
+        NextAwarePasswordResetView.as_view(
             template_name="accounts/password_reset.html",
         ),
         name='password_reset'
@@ -29,7 +36,7 @@ urlpatterns = [
     # Link from Email - Form to Enter New Password
     path(
         'reset/<uidb64>/<token>/',
-        auth_views.PasswordResetConfirmView.as_view(
+        NextAwarePasswordResetConfirmView.as_view(
             template_name="accounts/password_reset_confirm.html",
             success_url='/accounts/reset/done/'  # ✅ Correct success redirect
         ),
