@@ -11,4 +11,9 @@ urlpatterns = [
     path("applications/<int:pk>/status/", views.handle_application_status, name="adminpanel-application-status"),
     path("transactions/create/", views.create_transaction, name="adminpanel-create-transaction"),
     path("transactions/<int:pk>/mark-paid/", views.mark_transaction_paid, name="adminpanel-mark-transaction-paid"),
+    path(
+        "notifications/<int:pk>/delete/",
+        views.delete_notification,
+        name="adminpanel-delete-notification",
+    ),
 ]

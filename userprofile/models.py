@@ -90,6 +90,14 @@ class Notification(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
 	message = models.TextField()
 	link = models.CharField(max_length=255, blank=True)
+	is_staff_only = models.BooleanField(default=False)
+	subscription_entry = models.ForeignKey(
+		"adminpanel.SubscriptionLedgerEntry",
+		on_delete=models.SET_NULL,
+		null=True,
+		blank=True,
+		related_name="notifications",
+	)
 	is_read = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True)
 

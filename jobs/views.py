@@ -3,10 +3,12 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 
 from userprofile.models import UserProfile
+from userprofile.utils import notify_staff
 
 from .forms import JobForm
 from .models import Job, JobApplication
@@ -25,6 +27,12 @@ def post_job(request):
             job = form.save(commit=False)
             job.poster = request.user
             job.save()
+            notify_staff(
+                message=(
+                    f"{request.user.username} posted '{job.work_title}' (Tracking {job.tracking_code})."
+                ),
+                link=f"{reverse('adminpanel-dashboard')}?section=jobs",
+            )
             messages.success(request, "Job posted successfully.")
             return redirect("user-dashboard")
     else:
@@ -71,6 +79,12 @@ def apply_to_job(request, job_id):
         messages.info(request, "You already applied to this job.")
     else:
         messages.success(request, "Application submitted successfully.")
+        notify_staff(
+            message=(
+                f"{request.user.username} applied for '{job.work_title}' (Tracking {job.tracking_code})."
+            ),
+            link=f"{reverse('adminpanel-dashboard')}?section=approvals",
+        )
     return redirect(redirect_target or "job_list")
 
 
