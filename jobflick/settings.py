@@ -158,4 +158,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "cituse200@gmail.com"
 EMAIL_HOST_PASSWORD = "kjzeobhwqqawlekj"
 
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = "Jobflick <cituse200@gmail.com>"
+JOBFLICK_CONTACT_EMAIL = "jobflick0@gmail.com"
