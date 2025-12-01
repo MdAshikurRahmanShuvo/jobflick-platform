@@ -144,6 +144,7 @@
     <nav>
       <a href="{% url 'user-dashboard' %}">Home</a>
       <a href="{% url 'userprofile-edit' %}">Edit Profile</a>
+      <a href="{% url 'userprofile-subscription' %}">Subscription</a>
       <a href="{% url 'post_job' %}">Post a Job</a>
       <a href="{% url 'job_list' %}">Apply for Jobs</a>
       <a href="{% url 'userprofile-notifications' %}">Notifications
@@ -166,12 +167,26 @@
     <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
     <section class="dashboard-main">
-      <div class="topbar">
+      <div class="topbar flex-wrap justify-content-between" style="gap: 1rem;">
         <div class="text-end">
-        <p class="text-muted small mb-0">Signed in as</p>
-        <h5 class="mb-0">{{ profile.user.username }}</h5>
+          <p class="text-muted small mb-0">Signed in as</p>
+          <h5 class="mb-0">{{ profile.user.username }}</h5>
+        </div>
+        <div class="d-flex align-items-center flex-wrap" style="gap: 1.5rem;">
+          <div class="text-end">
+            <p class="text-muted small mb-0">Wallet Balance</p>
+            <h5 class="mb-0">{{ profile.wallet_balance }} BDT</h5>
+          </div>
+          <div class="text-end">
+            <p class="text-muted small mb-0">Subscription</p>
+            {% if profile.has_active_subscription %}
+              <span class="badge badge-success">Active till {{ profile.subscription_expires_at|date:"M j, Y" }}</span>
+            {% else %}
+              <a class="btn btn-outline-primary btn-sm" href="{% url 'userprofile-subscription' %}">Activate Access</a>
+            {% endif %}
+          </div>
+        </div>
       </div>
-    </div>
 
       {% block dashboard_content %}{% endblock %}
     </section>

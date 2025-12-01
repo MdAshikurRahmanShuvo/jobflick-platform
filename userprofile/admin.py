@@ -4,7 +4,7 @@ from .models import Notification, UserProfile
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-	list_display = ("user", "display_name")
+	list_display = ("user", "display_name", "wallet_balance", "subscription_plan", "subscription_expires_at")
 	search_fields = ("user__username", "display_name")
 
 

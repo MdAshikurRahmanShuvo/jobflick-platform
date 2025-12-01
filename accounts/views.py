@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
 
 from .forms import SignupForm
+from userprofile.models import UserProfile
 
 # ---------- SIGNUP ----------
 def signup_view(request):
@@ -37,6 +38,7 @@ def signup_view(request):
             email=email,
             password=password
         )
+        UserProfile.objects.create(user=user)
 
         login(request, user)
         messages.success(request, "Signup successful!")
