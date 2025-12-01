@@ -16,6 +16,9 @@ from .models import Job, JobApplication
 @never_cache
 def post_job(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if not profile.has_active_subscription:
+        messages.warning(request, "You need an active subscription to post jobs.")
+        return redirect("userprofile-subscription")
     if request.method == "POST":
         form = JobForm(request.POST)
         if form.is_valid():
@@ -47,11 +50,15 @@ def job_list(request):
 @never_cache
 def apply_to_job(request, job_id):
     job = get_object_or_404(Job, pk=job_id)
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
     redirect_target = request.POST.get("redirect_to")
     if redirect_target and not redirect_target.startswith("/"):
         redirect_target = None
     if request.method != "POST":
         return redirect(redirect_target or "job_list")
+    if not profile.has_active_subscription:
+        messages.warning(request, "An active subscription is required to apply for jobs.")
+        return redirect("userprofile-subscription")
     if job.poster_id == request.user.id:
         messages.error(request, "You cannot apply to a job you posted.")
         return redirect(redirect_target or "job_list")

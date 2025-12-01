@@ -10,9 +10,10 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from jobs.models import Job, JobApplication
+from userprofile.models import UserProfile
 
 from .forms import AdminLoginForm, TransactionForm
-from .models import Transaction
+from .models import SubscriptionLedgerEntry, Transaction
 
 
 SECTION_COPY = {
@@ -20,6 +21,7 @@ SECTION_COPY = {
 	"jobs": {"title": "Jobs", "subtitle": "Review every job post."},
 	"approvals": {"title": "Job Approve", "subtitle": "Decide who gets approved."},
 	"transactions": {"title": "Transactions", "subtitle": "Track platform funds."},
+	"subscribers": {"title": "Subscribers", "subtitle": "See who activated paid plans."},
 }
 
 
@@ -85,10 +87,41 @@ def dashboard_view(request):
 	elif section == "transactions":
 		transactions = Transaction.objects.select_related("recipient", "job").order_by("-created_at")
 		aggregates = transactions.aggregate(total_amount=Sum("amount"))
+		subscription_total = SubscriptionLedgerEntry.objects.aggregate(total_amount=Sum("amount"))
 		context.update(
 			{
 				"transactions": transactions,
 				"total_amount": aggregates.get("total_amount") or 0,
+				"subscription_total": subscription_total.get("total_amount") or 0,
+			}
+		)
+	elif section == "subscribers":
+		entries = SubscriptionLedgerEntry.objects.select_related("user").order_by("-created_at")
+		plan_order = [
+			UserProfile.SubscriptionPlan.ONE_MONTH,
+			UserProfile.SubscriptionPlan.SIX_MONTHS,
+			UserProfile.SubscriptionPlan.ONE_YEAR,
+		]
+		plan_sections = []
+		for plan_key in plan_order:
+			plan_entries = entries.filter(plan=plan_key)
+			plan_total = plan_entries.aggregate(total_amount=Sum("amount"))
+			plan_sections.append(
+				{
+					"plan": plan_key,
+					"label": UserProfile.SUBSCRIPTION_DETAILS.get(plan_key, {}).get(
+						"label",
+						UserProfile.SubscriptionPlan(plan_key).label,
+					),
+					"entries": plan_entries,
+					"total": plan_total.get("total_amount") or 0,
+				}
+			)
+		overall_total = entries.aggregate(total_amount=Sum("amount"))
+		context.update(
+			{
+				"plan_sections": plan_sections,
+				"subscription_total": overall_total.get("total_amount") or 0,
 			}
 		)
 	return render(request, "adminpanel/dashboard.html", context)

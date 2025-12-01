@@ -140,10 +140,18 @@
     </table>
   </div>
 {% elif section == 'transactions' %}
-  <div class="mb-4">
-    <div class="p-4 bg-white rounded shadow-sm">
-      <p class="text-muted mb-1">Total Balance</p>
-      <h3 class="mb-0">{{ total_amount|default:0 }} BDT</h3>
+  <div class="row mb-4">
+    <div class="col-md-6 mb-3 mb-md-0">
+      <div class="p-4 bg-white rounded shadow-sm h-100">
+        <p class="text-muted mb-1">Payout Balance</p>
+        <h3 class="mb-0">{{ total_amount|default:0 }} BDT</h3>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="p-4 bg-white rounded shadow-sm h-100">
+        <p class="text-muted mb-1">Subscription Revenue</p>
+        <h3 class="mb-0">{{ subscription_total|default:0 }} BDT</h3>
+      </div>
     </div>
   </div>
   <div class="admin-table-scroll">
@@ -193,5 +201,49 @@
       </tbody>
     </table>
   </div>
+{% elif section == 'subscribers' %}
+  <div class="mb-4">
+    <div class="p-4 bg-white rounded shadow-sm">
+      <p class="text-muted mb-1">Total Subscription Revenue</p>
+      <h3 class="mb-0">{{ subscription_total|default:0 }} BDT</h3>
+    </div>
+  </div>
+  {% for plan in plan_sections %}
+    <div class="card mb-4 shadow-sm border-0">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-0">{{ plan.label }}</h5>
+          <small class="text-muted">{{ plan.entries|length }} subscribers</small>
+        </div>
+        <span class="badge badge-primary">{{ plan.total }} BDT collected</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="admin-table-scroll">
+          <table class="table mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Wallet After</th>
+                <th>Purchased At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in plan.entries %}
+              <tr>
+                <td>{{ entry.user.username }}</td>
+                <td>{{ entry.amount }} BDT</td>
+                <td>{{ entry.wallet_after }} BDT</td>
+                <td>{{ entry.created_at|date:"M d, Y h:i A" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted">No subscribers yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
 {% endif %}
 {% endblock %}
