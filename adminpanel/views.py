@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from jobs.models import Job, JobApplication
-from userprofile.models import UserProfile
+from userprofile.models import Notification, UserProfile
 
 from .forms import AdminLoginForm, TransactionForm
 from .models import SubscriptionLedgerEntry, Transaction
@@ -22,6 +22,7 @@ SECTION_COPY = {
 	"approvals": {"title": "Job Approve", "subtitle": "Decide who gets approved."},
 	"transactions": {"title": "Transactions", "subtitle": "Track platform funds."},
 	"subscribers": {"title": "Subscribers", "subtitle": "See who activated paid plans."},
+	"notifications": {"title": "Notifications", "subtitle": "Stay on top of user activity."},
 }
 
 
@@ -124,6 +125,15 @@ def dashboard_view(request):
 				"subscription_total": overall_total.get("total_amount") or 0,
 			}
 		)
+	elif section == "notifications":
+		notifications = (
+			Notification.objects.filter(user=request.user, is_staff_only=True)
+			.order_by("-created_at")
+		)
+		unread_ids = list(notifications.filter(is_read=False).values_list("id", flat=True))
+		if unread_ids:
+			Notification.objects.filter(id__in=unread_ids).update(is_read=True)
+		context["notifications"] = notifications
 	return render(request, "adminpanel/dashboard.html", context)
 
 
@@ -187,3 +197,17 @@ def mark_transaction_paid(request, pk):
 	transaction.save(update_fields=["status", "processed_at"])
 	messages.success(request, "Transaction marked as paid.")
 	return _redirect_to_section("transactions")
+
+
+@staff_required
+@require_POST
+def delete_notification(request, pk):
+	notification = get_object_or_404(
+		Notification,
+		pk=pk,
+		user=request.user,
+		is_staff_only=True,
+	)
+	notification.delete()
+	messages.success(request, "Notification removed.")
+	return _redirect_to_section("notifications")

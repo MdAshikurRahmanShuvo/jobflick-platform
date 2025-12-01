@@ -43,7 +43,6 @@ class SubscriptionLedgerEntry(models.Model):
 	plan = models.CharField(max_length=20, choices=UserProfile.SubscriptionPlan.choices)
 	amount = models.PositiveIntegerField()
 	wallet_before = models.PositiveIntegerField()
-	wallet_after = models.PositiveIntegerField()
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	class Meta:

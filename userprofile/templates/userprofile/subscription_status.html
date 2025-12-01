@@ -1,0 +1,56 @@
+{% extends "userprofile/layout.html" %}
+
+{% block dashboard_content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.14/dist/tailwind.min.css">
+
+<div class="space-y-6 mt-4">
+  <section class="bg-white rounded-2xl shadow px-6 py-8 md:px-10 md:py-10 border border-slate-100">
+    <div>
+      <p class="text-sm uppercase tracking-wide text-slate-400">Current Plan</p>
+      {% if plan_details %}
+        <h2 class="text-3xl font-bold text-slate-900">{{ plan_details.label }}</h2>
+        <p class="text-slate-500 mt-1">Full access for {{ plan_details.duration_days }} days.</p>
+      {% else %}
+        <h2 class="text-3xl font-bold text-slate-900">No Active Plan</h2>
+        <p class="text-slate-500 mt-1">Activate a subscription to unlock posting and applying.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="bg-white rounded-2xl shadow p-8 border border-slate-100">
+    <h3 class="text-lg font-semibold text-slate-900 mb-4">Plan Timeline</h3>
+    <dl class="divide-y divide-slate-100">
+      <div class="py-3 flex justify-between">
+        <dt class="text-slate-500">Purchased On</dt>
+        <dd class="font-semibold text-slate-900">
+          {% if latest_entry %}
+            {{ latest_entry.created_at|date:"M d, Y h:i A" }}
+          {% else %}
+            —
+          {% endif %}
+        </dd>
+      </div>
+      <div class="py-3 flex justify-between">
+        <dt class="text-slate-500">Expires On</dt>
+        <dd class="font-semibold text-slate-900">
+          {% if profile.subscription_expires_at %}
+            {{ profile.subscription_expires_at|date:"M d, Y" }}
+          {% else %}
+            —
+          {% endif %}
+        </dd>
+      </div>
+      <div class="py-3 flex justify-between">
+        <dt class="text-slate-500">Plan Duration</dt>
+        <dd class="font-semibold text-slate-900">
+          {% if plan_details %}
+            {{ plan_details.duration_days }} days
+          {% else %}
+            —
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+  </section>
+</div>
+{% endblock %}

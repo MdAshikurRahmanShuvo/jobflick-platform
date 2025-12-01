@@ -1,0 +1,42 @@
+{% extends "userprofile/layout.html" %}
+
+{% block dashboard_content %}
+<div class="bg-white rounded-2xl shadow p-6">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="h4 mb-1">Notification Detail</h2>
+      <p class="text-muted mb-0">Created {{ notification.created_at|date:"M d, Y h:i A" }}</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'userprofile-notifications' %}">Back</a>
+  </div>
+  <div class="border rounded p-4">
+    <p class="mb-2">{{ notification.message }}</p>
+  </div>
+  {% if subscription_receipt %}
+  <div class="mt-4 border rounded p-4">
+    <h5 class="mb-3">Subscription Receipt</h5>
+    <dl class="row mb-0">
+      <dt class="col-sm-4">Plan</dt>
+      <dd class="col-sm-8">{{ subscription_receipt.plan }}</dd>
+
+      <dt class="col-sm-4">Amount Paid</dt>
+      <dd class="col-sm-8">{{ subscription_receipt.amount }} BDT</dd>
+
+      <dt class="col-sm-4">Wallet Before</dt>
+      <dd class="col-sm-8">{{ subscription_receipt.wallet_before }} BDT</dd>
+
+      <dt class="col-sm-4">Wallet After</dt>
+      <dd class="col-sm-8">{{ subscription_receipt.wallet_after }} BDT</dd>
+
+      <dt class="col-sm-4">Purchased On</dt>
+      <dd class="col-sm-8">{{ subscription_receipt.purchased_at|date:"M d, Y h:i A" }}</dd>
+
+      {% if subscription_receipt.duration_days %}
+      <dt class="col-sm-4">Plan Duration</dt>
+      <dd class="col-sm-8">{{ subscription_receipt.duration_days }} Days</dd>
+      {% endif %}
+    </dl>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
