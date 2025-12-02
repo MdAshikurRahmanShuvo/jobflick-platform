@@ -32,6 +32,8 @@ class Job(models.Model):
 		blank=True,
 		null=True,
 	)
+	is_filled = models.BooleanField(default=False)
+	filled_at = models.DateTimeField(blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	class Meta:

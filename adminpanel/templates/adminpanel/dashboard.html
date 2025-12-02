@@ -145,6 +145,9 @@
           <td>
             <div class="fw-semibold">{{ app.job.work_title }}</div>
             <small class="text-muted">{{ app.job.tracking_code }}</small>
+            {% if app.job.is_filled %}
+              <div><span class="badge badge-dark mt-2">Hiring completed</span></div>
+            {% endif %}
           </td>
           <td>{{ app.applicant.username }}</td>
           <td>{{ app.created_at|date:"M d, Y h:i A" }}</td>
@@ -159,18 +162,22 @@
           </td>
           <td class="text-end">
             {% if app.status == 'pending' %}
-            <div class="d-inline-flex">
-              <form method="post" action="{% url 'adminpanel-application-status' app.id %}" class="mr-2">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="approve">
-                <button class="btn btn-sm btn-success">Approve</button>
-              </form>
-              <form method="post" action="{% url 'adminpanel-application-status' app.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="decline">
-                <button class="btn btn-sm btn-outline-danger">Decline</button>
-              </form>
-            </div>
+            {% if app.job.is_filled %}
+              <span class="badge badge-secondary">Closed</span>
+            {% else %}
+              <div class="d-inline-flex">
+                <form method="post" action="{% url 'adminpanel-application-status' app.id %}" class="mr-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="approve">
+                  <button class="btn btn-sm btn-success">Approve</button>
+                </form>
+                <form method="post" action="{% url 'adminpanel-application-status' app.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="decline">
+                  <button class="btn btn-sm btn-outline-danger">Decline</button>
+                </form>
+              </div>
+            {% endif %}
             {% else %}
             <small class="text-muted">{{ app.decision_at|timesince }} ago</small>
             {% endif %}

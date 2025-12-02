@@ -25,6 +25,9 @@
         <td>
           <div class="fw-semibold">{{ application.job.work_title }}</div>
           <small class="text-muted">{{ application.job.tracking_code }}</small>
+          {% if application.job.is_filled %}
+            <div><span class="badge badge-dark mt-2">Hiring completed</span></div>
+          {% endif %}
         </td>
         <td>
           <div>{{ application.applicant.username }}</div>
@@ -42,18 +45,22 @@
         </td>
         <td>
           {% if application.status == 'pending' %}
-          <div class="d-flex align-items-center">
-            <form class="mr-2" method="post" action="{% url 'update_application_status' application.id %}">
-              {% csrf_token %}
-              <input type="hidden" name="action" value="approve">
-              <button class="btn btn-success btn-sm" type="submit">Approve</button>
-            </form>
-            <form method="post" action="{% url 'update_application_status' application.id %}">
-              {% csrf_token %}
-              <input type="hidden" name="action" value="reject">
-              <button class="btn btn-outline-danger btn-sm" type="submit">Reject</button>
-            </form>
-          </div>
+            {% if application.job.is_filled %}
+              <span class="badge badge-secondary">Closed</span>
+            {% else %}
+              <div class="d-flex align-items-center">
+                <form class="mr-2" method="post" action="{% url 'update_application_status' application.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="approve">
+                  <button class="btn btn-success btn-sm" type="submit">Approve</button>
+                </form>
+                <form method="post" action="{% url 'update_application_status' application.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="reject">
+                  <button class="btn btn-outline-danger btn-sm" type="submit">Reject</button>
+                </form>
+              </div>
+            {% endif %}
           {% else %}
             <small class="text-muted">Updated {{ application.decision_at|timesince }} ago</small>
           {% endif %}

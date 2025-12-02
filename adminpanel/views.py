@@ -204,12 +204,20 @@ def handle_application_status(request, pk):
 	if action not in {"approve", "decline"}:
 		messages.error(request, "Invalid action.")
 		return redirect("adminpanel-dashboard")
+	job = application.job
+	if action == "approve" and job.is_filled and application.status != JobApplication.Status.APPROVED:
+		messages.error(request, "This job already has a selected candidate.")
+		return _redirect_to_section("approvals")
 	application.status = (
 		JobApplication.Status.APPROVED if action == "approve" else JobApplication.Status.REJECTED
 	)
 	application.decided_by = request.admin_user
 	application.decision_at = timezone.now()
 	application.save()
+	if application.status == JobApplication.Status.APPROVED and not job.is_filled:
+		job.is_filled = True
+		job.filled_at = timezone.now()
+		job.save(update_fields=["is_filled", "filled_at"])
 	messages.success(request, f"Application marked as {application.get_status_display().lower()}.")
 	return _redirect_to_section("approvals")
 
