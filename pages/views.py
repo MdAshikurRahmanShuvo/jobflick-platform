@@ -1,9 +1,14 @@
+from types import SimpleNamespace
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
+from django.db.models import Prefetch
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from jobs.models import Job, JobApplication
+from userprofile.models import UserProfile
 
 
 def _page_context(request):
@@ -14,13 +19,34 @@ def _page_context(request):
 def home(request):
     if request.user.is_authenticated and not request.user.is_staff:
         return redirect('user-dashboard')
-    jobs = Job.objects.filter(status=Job.Status.APPROVED).select_related("poster")[:6]
+    base_jobs = Job.objects.filter(status=Job.Status.APPROVED).select_related("poster").order_by("-created_at")
+    profile = None
+    if request.user.is_authenticated:
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        jobs = base_jobs.prefetch_related(
+            Prefetch(
+                "applications",
+                queryset=JobApplication.objects.filter(applicant=request.user),
+                to_attr="app_for_user",
+            )
+        )
+    else:
+        jobs = base_jobs
+    apply_profile = profile or SimpleNamespace(has_active_subscription=False, wallet_balance=0)
+    featured_jobs = jobs[:6]
     stats = {
         "total_users": get_user_model().objects.count(),
         "total_jobs": Job.objects.filter(status=Job.Status.APPROVED).count(),
         "total_applications": JobApplication.objects.count(),
     }
-    context = {"featured_jobs": jobs, **stats}
+    context = {
+        "featured_jobs": featured_jobs,
+        "job_cards": jobs,
+        "profile": profile,
+        "apply_profile": apply_profile,
+        "apply_redirect_path": reverse('job_list'),
+        **stats,
+    }
     return render(request, 'pages/home.html', context)
 
 

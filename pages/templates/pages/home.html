@@ -74,70 +74,9 @@
 </section>
 
 <section class="mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Latest job posts</h4>
-        <a class="btn btn-outline-primary btn-sm" href="{% url 'job_list' %}">View all</a>
-    </div>
-    {% if featured_jobs %}
-        <div class="row">
-            {% for job in featured_jobs %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title mb-1">{{ job.work_title }}</h5>
-                            {% if job.is_filled %}
-                                <span class="badge badge-dark mb-2">Hiring completed</span>
-                            {% endif %}
-                            <p class="text-muted small mb-2">{{ job.location }} · {{ job.duration }}</p>
-                            <p class="mb-1"><strong>Worker type:</strong> {{ job.worker_type }}</p>
-                            <p class="mb-1"><strong>Skills:</strong> {{ job.skills }}</p>
-                        </div>
-                        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-                            <span class="text-primary font-weight-bold">৳{{ job.amount }}</span>
-                            <span class="small text-muted">{{ job.poster.username }}</span>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="text-center py-5 bg-white border rounded">
-            <h5 class="mb-2">No jobs yet</h5>
-            <p class="text-muted mb-3">Be the first to publish a task for the community.</p>
-            <a class="btn btn-primary" href="{% url 'post_job' %}">Post a job</a>
-        </div>
-    {% endif %}
+    {% include "jobs/_apply_jobs_section.html" with jobs=job_cards apply_profile=apply_profile show_heading=False show_subscription_alerts=False apply_redirect_path=apply_redirect_path %}
 </section>
 
-<section class="stats-section my-5 py-5 px-4">
-    <div class="text-center mb-4">
-        <p class="text-uppercase small mb-1 stats-label">Platform pulse</p>
-        <h2 class="mb-0">Real-time trust signals</h2>
-    </div>
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="stats-card">
-                <p class="stats-label mb-2">Total users</p>
-                <p class="stats-value mb-1">{{ total_users }}</p>
-                <p class="mb-0">People who already trust JobFlick for faster gigs.</p>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="stats-card">
-                <p class="stats-label mb-2">Job posts</p>
-                <p class="stats-value mb-1">{{ total_jobs }}</p>
-                <p class="mb-0">New short-term opportunities published across the platform.</p>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="stats-card">
-                <p class="stats-label mb-2">Applications sent</p>
-                <p class="stats-value mb-1">{{ total_applications }}</p>
-                <p class="mb-0">Proof that candidates are actively applying and getting hired.</p>
-            </div>
-        </div>
-    </div>
-</section>
 {% endblock %}
 
 
