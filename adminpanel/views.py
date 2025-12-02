@@ -1,8 +1,7 @@
 from functools import wraps
 
 from django.contrib import messages
-from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -16,9 +15,42 @@ from .forms import AdminLoginForm, TransactionForm
 from .models import SubscriptionLedgerEntry, Transaction
 
 
+ADMIN_SESSION_KEY = "adminpanel_user_id"
+User = get_user_model()
+
+
+def _get_admin_user(request):
+	if hasattr(request, "_admin_user_cache"):
+		return request._admin_user_cache
+	user_id = request.session.get(ADMIN_SESSION_KEY)
+	if not user_id:
+		request._admin_user_cache = None
+		return None
+	try:
+		user = User.objects.get(pk=user_id, is_staff=True)
+	except User.DoesNotExist:
+		request.session.pop(ADMIN_SESSION_KEY, None)
+		user = None
+	request._admin_user_cache = user
+	return user
+
+
+def _set_admin_session(request, user):
+	request.session[ADMIN_SESSION_KEY] = user.pk
+	request._admin_user_cache = user
+	request.session.modified = True
+
+
+def _clear_admin_session(request):
+	request.session.pop(ADMIN_SESSION_KEY, None)
+	request._admin_user_cache = None
+	request.session.modified = True
+
+
 SECTION_COPY = {
 	"users": {"title": "Users", "subtitle": "See all registered members."},
 	"jobs": {"title": "Jobs", "subtitle": "Review every job post."},
+	"post-approvals": {"title": "Post Approvals", "subtitle": "Approve or remove newly submitted jobs."},
 	"approvals": {"title": "Job Approve", "subtitle": "Decide who gets approved."},
 	"transactions": {"title": "Transactions", "subtitle": "Track platform funds."},
 	"subscribers": {"title": "Subscribers", "subtitle": "See who activated paid plans."},
@@ -34,24 +66,23 @@ def _redirect_to_section(section: str):
 def staff_required(view_func):
 	@wraps(view_func)
 	def _wrapped(request, *args, **kwargs):
-		if not request.user.is_authenticated:
+		admin_user = _get_admin_user(request)
+		if not admin_user:
+			messages.error(request, "Please sign in to the admin panel.")
 			return redirect("adminpanel-login")
-		if not request.user.is_staff:
-			messages.error(request, "You do not have permission to access the admin panel.")
-			return redirect("adminpanel-login")
+		request.admin_user = admin_user
 		return view_func(request, *args, **kwargs)
 
 	return _wrapped
 
 
 def login_view(request):
-	if request.user.is_authenticated:
-		# Always force a fresh sign-in so previous sessions cannot auto-resume
-		logout(request)
+	if _get_admin_user(request):
+		return redirect("adminpanel-dashboard")
 	form = AdminLoginForm(request.POST or None)
 	if request.method == "POST" and form.is_valid():
 		user = form.cleaned_data["user"]
-		login(request, user)
+		_set_admin_session(request, user)
 		messages.success(request, "Welcome back to the admin panel.")
 		return redirect("adminpanel-dashboard")
 	return render(request, "adminpanel/login.html", {"form": form, "hide_nav": True, "hide_footer": True})
@@ -59,7 +90,7 @@ def login_view(request):
 
 @staff_required
 def logout_view(request):
-	logout(request)
+	_clear_admin_session(request)
 	messages.info(request, "You have been logged out.")
 	return redirect("adminpanel-login")
 
@@ -75,11 +106,18 @@ def dashboard_view(request):
 		"section_subtitle": SECTION_COPY[section]["subtitle"],
 		"hide_nav": True,
 		"hide_footer": True,
+		"admin_user": request.admin_user,
 	}
 	if section == "users":
 		context["users"] = User.objects.order_by("-date_joined")
 	elif section == "jobs":
 		context["jobs"] = Job.objects.select_related("poster").order_by("-created_at")
+	elif section == "post-approvals":
+		context["pending_jobs"] = (
+			Job.objects.filter(status=Job.Status.PENDING)
+			.select_related("poster")
+			.order_by("-created_at")
+		)
 	elif section == "approvals":
 		context["applications"] = (
 			JobApplication.objects.select_related("job", "applicant", "decided_by")
@@ -127,7 +165,7 @@ def dashboard_view(request):
 		)
 	elif section == "notifications":
 		notifications = (
-			Notification.objects.filter(user=request.user, is_staff_only=True)
+			Notification.objects.filter(user=request.admin_user, is_staff_only=True)
 			.order_by("-created_at")
 		)
 		unread_ids = list(notifications.filter(is_read=False).values_list("id", flat=True))
@@ -141,7 +179,7 @@ def dashboard_view(request):
 @require_POST
 def delete_user(request, user_id):
 	user = get_object_or_404(User, pk=user_id)
-	if user == request.user:
+	if user == request.admin_user:
 		messages.error(request, "You cannot delete your own account.")
 	else:
 		user.delete()
@@ -169,11 +207,43 @@ def handle_application_status(request, pk):
 	application.status = (
 		JobApplication.Status.APPROVED if action == "approve" else JobApplication.Status.REJECTED
 	)
-	application.decided_by = request.user
+	application.decided_by = request.admin_user
 	application.decision_at = timezone.now()
 	application.save()
 	messages.success(request, f"Application marked as {application.get_status_display().lower()}.")
 	return _redirect_to_section("approvals")
+
+
+@staff_required
+@require_POST
+def handle_job_post_status(request, job_id):
+	job = get_object_or_404(Job, pk=job_id)
+	action = request.POST.get("action")
+	if action == "approve":
+		job.status = Job.Status.APPROVED
+		job.approved_at = timezone.now()
+		job.approved_by = request.admin_user
+		job.save(update_fields=["status", "approved_at", "approved_by"])
+		Notification.objects.create(
+			user=job.poster,
+			message=(
+				f"Good news! '{job.work_title}' is live and visible to every Jobflick user."
+			),
+			link=reverse("job_list"),
+		)
+		messages.success(request, f"'{job.work_title}' is now live for users.")
+	elif action == "delete":
+		Notification.objects.create(
+			user=job.poster,
+			message=(
+				f"'{job.work_title}' was removed by the admin team. Update the details and submit again if needed."
+			),
+		)
+		job.delete()
+		messages.info(request, "Job removed permanently.")
+	else:
+		messages.error(request, "Invalid action.")
+	return _redirect_to_section("post-approvals")
 
 
 @staff_required
@@ -205,7 +275,7 @@ def delete_notification(request, pk):
 	notification = get_object_or_404(
 		Notification,
 		pk=pk,
-		user=request.user,
+		user=request.admin_user,
 		is_staff_only=True,
 	)
 	notification.delete()

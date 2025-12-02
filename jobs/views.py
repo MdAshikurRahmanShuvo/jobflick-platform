@@ -29,11 +29,11 @@ def post_job(request):
             job.save()
             notify_staff(
                 message=(
-                    f"{request.user.username} posted '{job.work_title}' (Tracking {job.tracking_code})."
+                    f"{request.user.username} submitted '{job.work_title}' (Tracking {job.tracking_code}) for approval."
                 ),
-                link=f"{reverse('adminpanel-dashboard')}?section=jobs",
+                link=f"{reverse('adminpanel-dashboard')}?section=post-approvals",
             )
-            messages.success(request, "Job posted successfully.")
+            messages.success(request, "Job submitted for review. We'll publish it once an admin approves.")
             return redirect("user-dashboard")
     else:
         form = JobForm()
@@ -44,7 +44,7 @@ def post_job(request):
 @never_cache
 def job_list(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    jobs = Job.objects.prefetch_related(
+    jobs = Job.objects.filter(status=Job.Status.APPROVED).prefetch_related(
         Prefetch(
             "applications",
             queryset=JobApplication.objects.filter(applicant=request.user),
@@ -57,7 +57,7 @@ def job_list(request):
 @login_required
 @never_cache
 def apply_to_job(request, job_id):
-    job = get_object_or_404(Job, pk=job_id)
+    job = get_object_or_404(Job, pk=job_id, status=Job.Status.APPROVED)
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     redirect_target = request.POST.get("redirect_to")
     if redirect_target and not redirect_target.startswith("/"):

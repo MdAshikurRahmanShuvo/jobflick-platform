@@ -19,18 +19,21 @@ from .utils import notify_staff
 def dashboard_view(request):
 	profile, _ = UserProfile.objects.get_or_create(user=request.user)
 	skills = [skill.strip() for skill in profile.skills.split(",") if skill.strip()]
-	jobs = Job.objects.prefetch_related(
+	live_jobs = Job.objects.filter(status=Job.Status.APPROVED).prefetch_related(
 		Prefetch(
 			"applications",
 			queryset=JobApplication.objects.filter(applicant=request.user),
 			to_attr="app_for_user",
 		)
 	)
+	my_jobs = Job.objects.filter(poster=request.user).select_related("poster").order_by("-created_at")
+	pending_jobs = my_jobs.exclude(status=Job.Status.APPROVED)
 	context = {
 		"profile": profile,
 		"skills": skills,
-		"jobs": jobs,
-		"job_count": jobs.count(),
+		"jobs": live_jobs,
+		"job_count": live_jobs.count(),
+		"pending_jobs": pending_jobs,
 		"hide_nav": True,
 		"hide_footer": True,
 	}
