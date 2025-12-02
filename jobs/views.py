@@ -64,6 +64,9 @@ def apply_to_job(request, job_id):
         redirect_target = None
     if request.method != "POST":
         return redirect(redirect_target or "job_list")
+    if job.is_filled:
+        messages.info(request, "Hiring has already been completed for this job.")
+        return redirect(redirect_target or "job_list")
     if not profile.has_active_subscription:
         messages.warning(request, "An active subscription is required to apply for jobs.")
         return redirect("userprofile-subscription")
@@ -113,11 +116,18 @@ def update_application_status(request, pk):
     if action not in {"approve", "reject"}:
         messages.error(request, "Invalid action.")
         return redirect("manage_job_applications")
+    if action == "approve" and application.job.is_filled and application.status != JobApplication.Status.APPROVED:
+        messages.error(request, "This job is already marked as hired.")
+        return redirect("manage_job_applications")
     application.status = (
         JobApplication.Status.APPROVED if action == "approve" else JobApplication.Status.REJECTED
     )
     application.decided_by = request.user
     application.decision_at = timezone.now()
     application.save()
+    if application.status == JobApplication.Status.APPROVED and not application.job.is_filled:
+        application.job.is_filled = True
+        application.job.filled_at = timezone.now()
+        application.job.save(update_fields=["is_filled", "filled_at"])
     messages.success(request, f"Application marked as {application.get_status_display().lower()}.")
     return redirect("manage_job_applications")

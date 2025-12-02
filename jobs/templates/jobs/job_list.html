@@ -26,6 +26,9 @@
             <h5 class="card-title mb-0">{{ job.work_title }}</h5>
             <span class="badge badge-light text-dark">{{ job.tracking_code }}</span>
           </div>
+          {% if job.is_filled %}
+            <div class="mb-2"><span class="badge badge-dark">Hiring completed</span></div>
+          {% endif %}
           <p class="text-muted small mb-1"><strong>Worker Type:</strong> {{ job.worker_type }}</p>
           <p class="text-muted small mb-1"><strong>Duration:</strong> {{ job.duration }}</p>
           <p class="text-muted small mb-1"><strong>Budget:</strong> {{ job.amount }} BDT</p>
@@ -40,6 +43,11 @@
           <div>
             {% if job.poster_id == request.user.id %}
               <span class="badge badge-secondary">You posted this</span>
+              {% if job.is_filled %}
+                <span class="badge badge-dark ml-1">Hiring completed</span>
+              {% endif %}
+            {% elif job.is_filled %}
+              <span class="badge badge-dark">Hiring completed</span>
             {% elif application %}
               {% if application.status == 'approved' %}
                 <span class="badge badge-success">Approved</span>

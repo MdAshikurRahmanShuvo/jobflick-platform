@@ -85,6 +85,9 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title mb-1">{{ job.work_title }}</h5>
+                            {% if job.is_filled %}
+                                <span class="badge badge-dark mb-2">Hiring completed</span>
+                            {% endif %}
                             <p class="text-muted small mb-2">{{ job.location }} · {{ job.duration }}</p>
                             <p class="mb-1"><strong>Worker type:</strong> {{ job.worker_type }}</p>
                             <p class="mb-1"><strong>Skills:</strong> {{ job.skills }}</p>
