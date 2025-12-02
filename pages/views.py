@@ -1,8 +1,9 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
 from django.shortcuts import redirect, render
 
-from jobs.models import Job
+from jobs.models import Job, JobApplication
 
 
 def _page_context(request):
@@ -14,7 +15,13 @@ def home(request):
     if request.user.is_authenticated and not request.user.is_staff:
         return redirect('user-dashboard')
     jobs = Job.objects.select_related("poster")[:6]
-    return render(request, 'pages/home.html', {"featured_jobs": jobs})
+    stats = {
+        "total_users": get_user_model().objects.count(),
+        "total_jobs": Job.objects.count(),
+        "total_applications": JobApplication.objects.count(),
+    }
+    context = {"featured_jobs": jobs, **stats}
+    return render(request, 'pages/home.html', context)
 
 
 def about(request):
