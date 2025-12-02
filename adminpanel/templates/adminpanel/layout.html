@@ -114,6 +114,7 @@
       <nav>
         <a href="{% url 'adminpanel-dashboard' %}?section=users" class="{% if section == 'users' %}active{% endif %}">Users</a>
         <a href="{% url 'adminpanel-dashboard' %}?section=jobs" class="{% if section == 'jobs' %}active{% endif %}">Jobs</a>
+        <a href="{% url 'adminpanel-dashboard' %}?section=post-approvals" class="{% if section == 'post-approvals' %}active{% endif %}">Post Approvals</a>
         <a href="{% url 'adminpanel-dashboard' %}?section=approvals" class="{% if section == 'approvals' %}active{% endif %}">Job Approve</a>
         <a href="{% url 'adminpanel-dashboard' %}?section=transactions" class="{% if section == 'transactions' %}active{% endif %}">Transactions</a>
         <a href="{% url 'adminpanel-dashboard' %}?section=subscribers" class="{% if section == 'subscribers' %}active{% endif %}">Subscribers</a>

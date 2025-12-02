@@ -14,10 +14,10 @@ def _page_context(request):
 def home(request):
     if request.user.is_authenticated and not request.user.is_staff:
         return redirect('user-dashboard')
-    jobs = Job.objects.select_related("poster")[:6]
+    jobs = Job.objects.filter(status=Job.Status.APPROVED).select_related("poster")[:6]
     stats = {
         "total_users": get_user_model().objects.count(),
-        "total_jobs": Job.objects.count(),
+        "total_jobs": Job.objects.filter(status=Job.Status.APPROVED).count(),
         "total_applications": JobApplication.objects.count(),
     }
     context = {"featured_jobs": jobs, **stats}

@@ -1,11 +1,16 @@
 from django.apps import apps
 from django.conf import settings
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
 
+
 class Job(models.Model):
+	class Status(models.TextChoices):
+		PENDING = "pending", "Pending"
+		APPROVED = "approved", "Approved"
 	poster = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
@@ -18,6 +23,15 @@ class Job(models.Model):
 	location = models.CharField(max_length=120)
 	skills = models.CharField(max_length=255)
 	tracking_code = models.CharField(max_length=16, unique=True, editable=False, blank=True)
+	status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+	approved_at = models.DateTimeField(blank=True, null=True)
+	approved_by = models.ForeignKey(
+		settings.AUTH_USER_MODEL,
+		related_name="approved_jobs",
+		on_delete=models.SET_NULL,
+		blank=True,
+		null=True,
+	)
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	class Meta:
@@ -86,8 +100,21 @@ class JobApplication(models.Model):
 			message = (
 				f"Your application for '{self.job.work_title}' (Tracking {self.job.tracking_code}) has been approved."
 			)
+			Notification.objects.create(
+				user=self.applicant,
+				message=message,
+				link=reverse("job_list"),
+			)
+			Notification.objects.create(
+				user=self.job.poster,
+				message=(
+					f"{self.applicant.username} has been approved for '{self.job.work_title}' "
+					f"(Tracking {self.job.tracking_code})."
+				),
+				link=reverse("user-dashboard"),
+			)
 		else:
 			message = (
 				f"Your application for '{self.job.work_title}' (Tracking {self.job.tracking_code}) was declined."
 			)
-		Notification.objects.create(user=self.applicant, message=message)
+			Notification.objects.create(user=self.applicant, message=message)

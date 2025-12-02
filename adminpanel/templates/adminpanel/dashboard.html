@@ -9,7 +9,7 @@
   </div>
   <div class="text-end">
     <p class="text-muted small mb-0">Signed in as</p>
-    <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+    <strong>{{ admin_user.get_full_name|default:admin_user.username }}</strong>
   </div>
 </div>
 
@@ -31,7 +31,7 @@
           <td>{{ user.email }}</td>
           <td>{{ user.date_joined|date:"M d, Y" }}</td>
           <td class="text-end">
-            {% if user != request.user %}
+            {% if user != admin_user %}
             <form method="post" action="{% url 'adminpanel-delete-user' user.id %}">
               {% csrf_token %}
               <button class="btn btn-link text-danger p-0" title="Delete" onclick="return confirm('Delete this user?')">
@@ -80,6 +80,49 @@
         </tr>
         {% empty %}
         <tr><td colspan="5" class="text-center text-muted">No job posts available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif section == 'post-approvals' %}
+  <div class="admin-table-scroll">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Title</th>
+          <th>Poster</th>
+          <th>Submitted</th>
+          <th>Location</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in pending_jobs %}
+        <tr>
+          <td>
+            <div class="fw-semibold">{{ job.work_title }}</div>
+            <small class="text-muted">{{ job.worker_type }}</small>
+          </td>
+          <td>{{ job.poster.username }}</td>
+          <td>{{ job.created_at|date:"M d, Y h:i A" }}</td>
+          <td>{{ job.location }}</td>
+          <td class="text-end">
+            <div class="d-inline-flex flex-wrap justify-content-end">
+              <form method="post" action="{% url 'adminpanel-job-status' job.id %}" class="mr-2">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <button class="btn btn-sm btn-success">Approve</button>
+              </form>
+              <form method="post" action="{% url 'adminpanel-job-status' job.id %}" onsubmit="return confirm('Delete this job post?');">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">No pending posts right now.</td></tr>
         {% endfor %}
       </tbody>
     </table>
