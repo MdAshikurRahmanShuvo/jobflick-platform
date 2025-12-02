@@ -37,21 +37,33 @@ def post_job(request):
             return redirect("user-dashboard")
     else:
         form = JobForm()
-    return render(request, "jobs/post_job.html", {"form": form, "profile": profile, "hide_nav": True})
+    return render(
+        request,
+        "jobs/post_job.html",
+        {"form": form, "profile": profile, "hide_nav": True, "hide_footer": True},
+    )
 
 
 @login_required
 @never_cache
 def job_list(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    jobs = Job.objects.filter(status=Job.Status.APPROVED).prefetch_related(
+    jobs = (
+        Job.objects.filter(status=Job.Status.APPROVED)
+        .exclude(poster=request.user)
+        .prefetch_related(
         Prefetch(
             "applications",
             queryset=JobApplication.objects.filter(applicant=request.user),
             to_attr="app_for_user",
+            )
         )
     )
-    return render(request, "jobs/job_list.html", {"jobs": jobs, "profile": profile, "hide_nav": True})
+    return render(
+        request,
+        "jobs/job_list.html",
+        {"jobs": jobs, "profile": profile, "hide_nav": True, "hide_footer": True},
+    )
 
 
 @login_required
