@@ -56,6 +56,7 @@ def home(request):
         "total_users": get_user_model().objects.count(),
         "total_jobs": Job.objects.filter(status=Job.Status.APPROVED).count(),
         "total_applications": JobApplication.objects.count(),
+        "total_completed": Job.objects.filter(status=Job.Status.APPROVED, is_filled=True).count(),
     }
     context = {
         "featured_jobs": featured_jobs,
