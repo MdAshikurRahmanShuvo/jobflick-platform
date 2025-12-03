@@ -4,12 +4,19 @@ from django.db import transaction
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.cache import never_cache
 
 from jobs.models import Job, JobApplication
 from adminpanel.models import SubscriptionLedgerEntry
+from payments.models import WalletTransaction
+from payments.services import (
+	InsufficientBalanceError,
+	apply_wallet_transaction,
+	create_pending_transaction,
+)
 
-from .forms import UserProfileForm
+from .forms import UserProfileForm, WalletPaymentForm, WalletPayoutRequestForm
 from .models import Notification, UserProfile
 from .utils import notify_staff
 
@@ -125,10 +132,68 @@ def dashboard_contact_view(request):
 @never_cache
 def transactions_view(request):
 	profile, _ = UserProfile.objects.get_or_create(user=request.user)
+	transactions = (
+		WalletTransaction.objects.filter(user=request.user)
+		.select_related("initiated_by", "job")
+		.order_by("-created_at")
+	)
+	payment_form = WalletPaymentForm(request.user)
+	payout_form = WalletPayoutRequestForm(request.user)
+	if request.method == "POST":
+		action = request.POST.get("action")
+		if action == "pay-jobflick":
+			payment_form = WalletPaymentForm(request.user, request.POST)
+			if payment_form.is_valid():
+				amount = payment_form.cleaned_data["amount"]
+				note = payment_form.cleaned_data["note"]
+				try:
+					result = apply_wallet_transaction(
+						user=request.user,
+						amount=amount,
+						direction=WalletTransaction.Direction.USER_TO_JOBFLICK,
+						category=WalletTransaction.Category.SERVICE_FEE,
+						note=note,
+						initiated_by=request.user,
+					)
+				except InsufficientBalanceError as exc:
+					payment_form.add_error("amount", str(exc))
+				else:
+					messages.success(
+						request,
+						f"Payment recorded as {result.transaction.reference}.",
+					)
+					return redirect("userprofile-transactions")
+		elif action == "request-payout":
+			payout_form = WalletPayoutRequestForm(request.user, request.POST)
+			if payout_form.is_valid():
+				transaction = create_pending_transaction(
+					user=request.user,
+					amount=payout_form.cleaned_data["amount"],
+					direction=WalletTransaction.Direction.JOBFLICK_TO_USER,
+					category=WalletTransaction.Category.PAYOUT,
+					note=payout_form.cleaned_data["note"],
+					initiated_by=request.user,
+				)
+				notify_staff(
+					message=(
+						f"{request.user.username} requested a payout of {transaction.amount} BDT"
+						f" (Ref {transaction.reference})."
+					),
+					link=f"{reverse('adminpanel-dashboard')}?section=transactions",
+				)
+				messages.success(request, "Payout request submitted. We'll notify you once processed.")
+				return redirect("userprofile-transactions")
 	return render(
 		request,
-		"userprofile/transactions_placeholder.html",
-		{"profile": profile, "hide_nav": True, "hide_footer": True},
+		"userprofile/transactions.html",
+		{
+			"profile": profile,
+			"hide_nav": True,
+			"hide_footer": True,
+			"transactions": transactions,
+			"payment_form": payment_form,
+			"payout_form": payout_form,
+		},
 	)
 
 
@@ -218,16 +283,24 @@ def subscription_view(request):
 			if profile.wallet_balance < plan["price"]:
 				messages.error(request, "Insufficient balance. Please top up your wallet to continue.")
 			else:
-					wallet_before = profile.wallet_balance
+				try:
 					with transaction.atomic():
-						profile.wallet_balance -= plan["price"]
+						txn_result = apply_wallet_transaction(
+							user=request.user,
+							amount=plan["price"],
+							direction=WalletTransaction.Direction.USER_TO_JOBFLICK,
+							category=WalletTransaction.Category.SUBSCRIPTION,
+							note=f"{plan['label']} subscription",
+							initiated_by=request.user,
+						)
+						profile.wallet_balance = txn_result.balance_after
 						profile.apply_subscription(selected_plan)
 						profile.save()
 						entry = SubscriptionLedgerEntry.objects.create(
 							user=request.user,
 							plan=selected_plan,
 							amount=plan["price"],
-							wallet_before=wallet_before,
+							wallet_before=txn_result.balance_before,
 						)
 						Notification.objects.create(
 							user=request.user,
@@ -244,6 +317,9 @@ def subscription_view(request):
 							),
 							link=admin_link,
 						)
+				except InsufficientBalanceError as exc:
+					messages.error(request, str(exc))
+				else:
 					messages.success(
 						request,
 						f"{plan['label']} activated. Your plan expires on {profile.subscription_expires_at}.",

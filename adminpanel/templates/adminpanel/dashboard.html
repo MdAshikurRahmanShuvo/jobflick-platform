@@ -190,66 +190,148 @@
     </table>
   </div>
 {% elif section == 'transactions' %}
-  <div class="row mb-4">
-    <div class="col-md-6 mb-3 mb-md-0">
+  <div class="row mb-4 g-3">
+    <div class="col-md-3">
       <div class="p-4 bg-white rounded shadow-sm h-100">
-        <p class="text-muted mb-1">Payout Balance</p>
-        <h3 class="mb-0">{{ total_amount|default:0 }} BDT</h3>
+        <p class="text-muted mb-1">Jobflick Wallet</p>
+        <h3 class="mb-1">{{ platform_balance|default:0 }} BDT</h3>
+        <small class="text-muted">Available platform balance</small>
       </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-3">
+      <div class="p-4 bg-white rounded shadow-sm h-100">
+        <p class="text-muted mb-1">User Payments Collected</p>
+        <h3 class="mb-1">{{ collection_total|default:0 }} BDT</h3>
+        <small class="text-muted">Completed debits from users</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="p-4 bg-white rounded shadow-sm h-100">
+        <p class="text-muted mb-1">Payouts Completed</p>
+        <h3 class="mb-1">{{ payout_total|default:0 }} BDT</h3>
+        <small class="text-muted">Credits sent to users</small>
+      </div>
+    </div>
+    <div class="col-md-3">
       <div class="p-4 bg-white rounded shadow-sm h-100">
         <p class="text-muted mb-1">Subscription Revenue</p>
-        <h3 class="mb-0">{{ subscription_total|default:0 }} BDT</h3>
+        <h3 class="mb-1">{{ subscription_total|default:0 }} BDT</h3>
+        <small class="text-muted">Aggregated from plan purchases</small>
       </div>
     </div>
   </div>
-  <div class="admin-table-scroll">
-    <table class="table table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>Recipient</th>
-          <th>Job</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th class="text-end">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for txn in transactions %}
-        <tr>
-          <td>{{ txn.recipient.username }}</td>
-          <td>
-            {% if txn.job %}
-              {{ txn.job.work_title }}
-            {% else %}
-              <span class="text-muted">N/A</span>
-            {% endif %}
-          </td>
-          <td>{{ txn.amount }} BDT</td>
-          <td>
-            {% if txn.status == 'paid' %}
-              <span class="badge badge-success">Paid</span>
-            {% else %}
-              <span class="badge badge-warning text-dark">Pending</span>
-            {% endif %}
-          </td>
-          <td class="text-end">
-            {% if txn.status != 'paid' %}
-            <form method="post" action="{% url 'adminpanel-mark-transaction-paid' txn.id %}">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-primary">Mark Paid</button>
-            </form>
-            {% else %}
-            <small class="text-muted">{{ txn.processed_at|date:"M d, Y" }}</small>
-            {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="5" class="text-center text-muted">No transactions recorded.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="row mb-4">
+    <div class="col-lg-5 mb-4 mb-lg-0">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h5 class="card-title">Manual Wallet Adjustment</h5>
+          <p class="text-muted small">Record payouts or collect platform fees. Updates the user's wallet instantly.</p>
+          <form method="post" action="{% url 'adminpanel-create-transaction' %}">
+            {% csrf_token %}
+            <div class="form-group mb-3">
+              <label class="form-label">Recipient</label>
+              {{ wallet_form.recipient }}
+            </div>
+            <div class="form-group mb-3">
+              <label class="form-label">Related Job</label>
+              {{ wallet_form.job }}
+            </div>
+            <div class="form-group mb-3">
+              <label class="form-label">Direction</label>
+              {{ wallet_form.direction }}
+            </div>
+            <div class="form-group mb-3">
+              <label class="form-label">Category</label>
+              {{ wallet_form.category }}
+            </div>
+            <div class="form-group mb-3">
+              <label class="form-label">Amount (BDT)</label>
+              {{ wallet_form.amount }}
+            </div>
+            <div class="form-group mb-3">
+              <label class="form-label">Note</label>
+              {{ wallet_form.note }}
+            </div>
+            <button class="btn btn-primary w-100" type="submit">Record Transaction</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="admin-table-scroll">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Reference</th>
+              <th>User</th>
+              <th>Job</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for txn in transactions %}
+            <tr>
+              <td>
+                <strong>{{ txn.reference }}</strong>
+                <div class="text-muted small">{{ txn.get_direction_display }}</div>
+                {% if txn.category %}
+                  <div class="text-muted small">{{ txn.get_category_display }}</div>
+                {% endif %}
+              </td>
+              <td>
+                <div>{{ txn.user.username }}</div>
+                {% if txn.initiated_by %}
+                  <small class="text-muted">By {{ txn.initiated_by.username }}</small>
+                {% endif %}
+              </td>
+              <td>
+                {% if txn.job %}
+                  {{ txn.job.work_title }}
+                {% else %}
+                  <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                {{ txn.amount }} BDT
+                {% if txn.balance_after is not None %}
+                  <div class="text-muted small">Balance {{ txn.balance_after }} BDT</div>
+                {% endif %}
+                {% if txn.note %}
+                  <div class="text-muted small">{{ txn.note }}</div>
+                {% endif %}
+              </td>
+              <td>
+                {% if txn.status == 'completed' %}
+                  <span class="badge badge-success">Completed</span>
+                  <div class="text-muted small">{{ txn.processed_at|date:"M d, Y" }}</div>
+                {% elif txn.status == 'processing' %}
+                  <span class="badge badge-info">Processing</span>
+                {% elif txn.status == 'pending' %}
+                  <span class="badge badge-warning text-dark">Pending</span>
+                {% else %}
+                  <span class="badge badge-danger">Failed</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if txn.status != 'completed' and txn.status != 'failed' %}
+                <form method="post" action="{% url 'adminpanel-mark-transaction-paid' txn.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-primary">Mark Completed</button>
+                </form>
+                {% else %}
+                <small class="text-muted">—</small>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted">No transactions recorded.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 {% elif section == 'subscribers' %}
   <div class="mb-4">
