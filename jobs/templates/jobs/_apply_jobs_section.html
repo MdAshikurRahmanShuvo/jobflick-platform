@@ -8,8 +8,6 @@
       {% else %}
         <a class="btn btn-outline-primary btn-sm" href="{% url 'userprofile-subscription' %}">Activate Subscription</a>
       {% endif %}
-    {% else %}
-      <a class="btn btn-outline-primary btn-sm" href="{% url 'login' %}?next={% url 'job_list' %}">Sign in to continue</a>
     {% endif %}
   </div>
 {% endif %}
@@ -88,7 +86,7 @@
                   <a class="btn btn-outline-secondary btn-sm" href="{% url 'userprofile-subscription' %}">Subscribe to Apply</a>
                 {% endif %}
               {% else %}
-                <a class="btn btn-outline-primary btn-sm" href="{% url 'login' %}?next={% url 'job_list' %}">Sign in to Apply</a>
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'login' %}?next={% url 'job_list' %}">Apply</a>
               {% endif %}
             {% endif %}
           </div>
