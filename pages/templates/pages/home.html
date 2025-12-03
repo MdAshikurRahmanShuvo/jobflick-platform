@@ -32,6 +32,57 @@
         font-size: 0.82rem;
         opacity: 0.85;
     }
+.steps {
+    padding: 70px 0;
+    background: #eef4ff;
+    border-radius: 1.25rem;
+}
+
+.step-grid {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    max-width: 1000px;
+    margin: auto;
+}
+
+.step-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.step-card span {
+    display: inline-block;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 45px;
+    margin-bottom: 15px;
+}
+
+.step-card h3 {
+    margin: 10px 0;
+    font-size: 20px;
+    color: #222;
+}
+
+.step-card p {
+    color: #555;
+    font-size: 15px;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
 </style>
 <section class="text-center py-5">
     <p class="text-uppercase text-primary small font-weight-bold mb-2">Short-Term Jobs Near You</p>
@@ -45,37 +96,206 @@
 
 <section class="row text-center py-4">
     <div class="col-md-4 mb-3">
-        <div class="border rounded-lg p-4 h-100">
+        <div class="border rounded-lg p-4 h-100 hover-card">
             <h5 class="mb-3">Verified Employers</h5>
             <p class="text-muted mb-0">Every post shows real company info so applicants know who they are working with.</p>
         </div>
     </div>
     <div class="col-md-4 mb-3">
-        <div class="border rounded-lg p-4 h-100">
+        <div class="border rounded-lg p-4 h-100 hover-card">
             <h5 class="mb-3">Location Filters</h5>
             <p class="text-muted mb-0">Search by city and availability to lock down nearby shifts instantly.</p>
         </div>
     </div>
     <div class="col-md-4 mb-3">
-        <div class="border rounded-lg p-4 h-100">
+        <div class="border rounded-lg p-4 h-100 hover-card">
             <h5 class="mb-3">Messaging Ready</h5>
             <p class="text-muted mb-0">Stay connected with applicants directly from your dashboard.</p>
         </div>
     </div>
 </section>
 
-<section class="bg-light rounded-lg p-4">
-    <h4 class="mb-3">Getting started is simple</h4>
-    <ol class="mb-0">
-        <li>Create a profile with a single click.</li>
-        <li>Post a job or explore open roles by category.</li>
-        <li>Track responses from the dashboard.</li>
-    </ol>
+<section class="steps my-5">
+    <h2 class="text-center mb-5">How JobFlick Works</h2>
+    <div class="step-grid">
+        <div class="step-card">
+            <span>1</span>
+            <h3>Create Account</h3>
+            <p>Sign up in minutes and start exploring jobs instantly.</p>
+        </div>
+        <div class="step-card">
+            <span>2</span>
+            <h3>Find or Post Jobs</h3>
+            <p>Browse tasks by category or post your own job.</p>
+        </div>
+        <div class="step-card">
+            <span>3</span>
+            <h3>Get Matched Fast</h3>
+            <p>Receive responses and get workers or work faster than ever.</p>
+        </div>
+    </div>
 </section>
 
-<section class="mt-5">
-    {% include "jobs/_apply_jobs_section.html" with jobs=job_cards apply_profile=apply_profile show_heading=False show_subscription_alerts=False apply_redirect_path=apply_redirect_path %}
+<section class="safety my-5">
+    <h2>Why People Trust JobFlick</h2>
+    <div class="safe-grid">
+        <div class="safe-card">
+            <div class="safe-icon">✔</div>
+            <h3>Verified Employers</h3>
+            <p>We verify job posts and employer information to ensure safe hiring every time.</p>
+        </div>
+        <div class="safe-card">
+            <div class="safe-icon">🔒</div>
+            <h3>Secure Messaging</h3>
+            <p>Communicate safely inside the platform with encrypted messaging.</p>
+        </div>
+        <div class="safe-card">
+            <div class="safe-icon">💰</div>
+            <h3>Zero Hidden Fees</h3>
+            <p>No extra charges — fair, transparent, and simple pricing for everyone.</p>
+        </div>
+    </div>
 </section>
+
+<style>
+.safety {
+    padding: 80px 0;
+    background: #f8fbff;
+    text-align: center;
+    border-radius: 1.25rem;
+}
+
+.safety h2 {
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 40px;
+}
+
+.safe-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    gap: 35px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.safe-card {
+    padding: 35px 25px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    border-radius: 18px;
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    transition: 0.35s;
+}
+
+.safe-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+    border-color: #3b82f6;
+}
+
+.safe-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+    color: #2563eb;
+}
+
+.safe-card h3 {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.safe-card p {
+    font-size: 15px;
+    color: #444;
+    line-height: 1.5;
+}
+</style>
+
+{% if top_cities %}
+<section class="cities my-5">
+    <h2>📍 Top Locations</h2>
+    <div class="city-grid">
+        {% for city in top_cities %}
+            <a class="city {% if city.has_jobs %}has-jobs{% else %}no-jobs{% endif %}" href="?location={{ city.name|urlencode }}#apply-jobs">
+                {{ city.name }}
+                {% if not city.has_jobs %}
+                    <small class="city-hint d-block mt-1">No jobs yet</small>
+                {% endif %}
+            </a>
+        {% endfor %}
+    </div>
+</section>
+
+<style>
+.cities {
+    padding: 60px 0;
+    background: #eef4ff;
+    border-radius: 1.25rem;
+}
+
+.cities h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+.city-grid {
+    display: grid;
+    max-width: 900px;
+    margin: auto;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.city {
+    background: #fff;
+    padding: 15px 0;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: 0.3s;
+    display: block;
+    color: #111;
+    text-decoration: none;
+}
+
+.city:hover {
+    background: #3b82f6;
+    color: #fff;
+    transform: translateY(-5px);
+}
+
+.city.no-jobs {
+    opacity: 0.7;
+}
+
+.city.no-jobs:hover {
+    background: #f97316;
+    color: #fff;
+}
+
+.city-hint {
+    font-size: 12px;
+    font-weight: normal;
+    color: #6b7280;
+}
+
+.city:hover .city-hint,
+.city.no-jobs:hover .city-hint {
+    color: #fff;
+}
+</style>
+{% endif %}
+
+<section class="mt-5" id="apply-jobs">
+    {% include "jobs/_apply_jobs_section.html" with jobs=job_cards apply_profile=apply_profile show_heading=False show_subscription_alerts=False apply_redirect_path=apply_redirect_path active_location=active_location active_category=None clear_filters_url=request.path %}
+</section>
+
 
 {% endblock %}
 

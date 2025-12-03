@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}FAQs{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="row">
+    <div class="col-lg-9 mx-auto">
+      <h1 class="mb-5">Frequently Asked Questions</h1>
+      <div class="mb-4">
+        <h5>How do I post a job?</h5>
+        <p>Create an account, activate a subscription, then use the Post a Job button. The listing goes live after an admin review.</p>
+      </div>
+      <div class="mb-4">
+        <h5>How long does approval take?</h5>
+        <p>Most jobs are reviewed within a few hours during business days. You’ll get a dashboard notification once approved.</p>
+      </div>
+      <div class="mb-4">
+        <h5>Can I apply without a subscription?</h5>
+        <p>You can browse openings, but applying requires an active plan so we can maintain verified applicants.</p>
+      </div>
+      <div class="mb-4">
+        <h5>How do I mark a job as filled?</h5>
+        <p>When you approve an applicant from the admin panel, the job automatically switches to “Hiring completed”.</p>
+      </div>
+      <div class="mb-4">
+        <h5>Need more help?</h5>
+        <p>Visit the <a href="{% url 'help-center' %}">Help Center</a> or contact us directly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

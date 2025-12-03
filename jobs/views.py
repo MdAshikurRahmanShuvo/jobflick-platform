@@ -48,21 +48,38 @@ def post_job(request):
 @never_cache
 def job_list(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    location_filter = request.GET.get("location", "").strip()
+    category_filter = request.GET.get("category", "").strip()
     jobs = (
         Job.objects.filter(status=Job.Status.APPROVED)
         .exclude(poster=request.user)
         .prefetch_related(
-        Prefetch(
-            "applications",
-            queryset=JobApplication.objects.filter(applicant=request.user),
-            to_attr="app_for_user",
+            Prefetch(
+                "applications",
+                queryset=JobApplication.objects.filter(applicant=request.user),
+                to_attr="app_for_user",
             )
         )
     )
+    active_location = None
+    if location_filter:
+        jobs = jobs.filter(location__icontains=location_filter)
+        active_location = location_filter
+    active_category = None
+    if category_filter:
+        jobs = jobs.filter(worker_type__icontains=category_filter)
+        active_category = category_filter
     return render(
         request,
         "jobs/job_list.html",
-        {"jobs": jobs, "profile": profile, "hide_nav": True, "hide_footer": True},
+        {
+            "jobs": jobs,
+            "profile": profile,
+            "hide_nav": True,
+            "hide_footer": True,
+            "active_location": active_location,
+            "active_category": active_category,
+        },
     )
 
 
