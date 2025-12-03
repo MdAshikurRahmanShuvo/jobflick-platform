@@ -5,33 +5,55 @@
 
 {% block content %}
 <style>
-    .stats-section {
-        background: linear-gradient(135deg, #0f4c81, #1d8cf8);
-        border-radius: 1.5rem;
-        box-shadow: 0 20px 45px rgba(15, 76, 129, 0.25);
-        color: #fff;
-    }
+.stats-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #e8f0ff, #f7fbff);
+    text-align: center;
+    border-radius: 1.25rem;
+}
 
-    .stats-card {
-        background: rgba(255, 255, 255, 0.12);
-        border-radius: 1rem;
-        padding: 2rem 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        backdrop-filter: blur(6px);
-        height: 100%;
-    }
+.stats-section h2 {
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 45px;
+}
 
-    .stats-value {
-        font-size: 2.75rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
+.stats-grid {
+    max-width: 1100px;
+    margin: auto;
+    display: grid;
+    gap: 35px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
 
-    .stats-label {
-        letter-spacing: 0.12em;
-        font-size: 0.82rem;
-        opacity: 0.85;
-    }
+.stat-card {
+    padding: 35px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 18px;
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    transition: 0.35s;
+}
+
+.stat-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.15);
+    border-color: #3b82f6;
+}
+
+.stat-number {
+    font-size: 40px;
+    font-weight: 800;
+    color: #2563eb;
+    margin-bottom: 12px;
+}
+
+.stat-card p {
+    font-size: 17px;
+    color: #333;
+    font-weight: 500;
+}
 .steps {
     padding: 70px 0;
     background: #eef4ff;
@@ -294,6 +316,28 @@
 
 <section class="mt-5" id="apply-jobs">
     {% include "jobs/_apply_jobs_section.html" with jobs=job_cards apply_profile=apply_profile show_heading=False show_subscription_alerts=False apply_redirect_path=apply_redirect_path active_location=active_location active_category=None clear_filters_url=request.path %}
+</section>
+
+<section class="stats-section my-5">
+    <h2>JobFlick Live Statistics</h2>
+    <div class="stats-grid">
+        <div class="stat-card hover-card">
+            <div class="stat-number">{{ total_users }}</div>
+            <p>Total Users</p>
+        </div>
+        <div class="stat-card hover-card">
+            <div class="stat-number">{{ total_jobs }}</div>
+            <p>Total Job Posts</p>
+        </div>
+        <div class="stat-card hover-card">
+            <div class="stat-number">{{ total_applications }}</div>
+            <p>Total Applications</p>
+        </div>
+        <div class="stat-card hover-card">
+            <div class="stat-number">{{ total_completed }}</div>
+            <p>Jobs Completed</p>
+        </div>
+    </div>
 </section>
 
 
