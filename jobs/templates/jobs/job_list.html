@@ -1,5 +1,5 @@
 {% extends "userprofile/layout.html" %}
 
 {% block dashboard_content %}
-{% include "jobs/_apply_jobs_section.html" with jobs=jobs apply_profile=profile %}
+{% include "jobs/_apply_jobs_section.html" with jobs=jobs apply_profile=profile apply_redirect_path=request.path active_location=active_location active_category=active_category clear_filters_url=request.path %}
 {% endblock %}

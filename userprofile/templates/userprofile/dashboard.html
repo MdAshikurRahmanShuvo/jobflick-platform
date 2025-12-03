@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block dashboard_content %}
-{% include "jobs/_apply_jobs_section.html" with jobs=jobs apply_profile=profile apply_redirect_path=request.path %}
+{% include "jobs/_apply_jobs_section.html" with jobs=jobs apply_profile=profile apply_redirect_path=request.path active_location=None active_category=None clear_filters_url=request.path %}
 
 {% if my_live_jobs %}
   <section class="mt-5">

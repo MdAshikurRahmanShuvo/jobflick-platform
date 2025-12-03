@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Help Center{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <h1 class="mb-4">Help Center</h1>
+      <p class="lead text-muted">Use these quick resources to resolve issues or reach the JobFlick support team.</p>
+      <div class="card-deck mt-4">
+        <div class="card shadow-sm border-0 hover-card">
+          <div class="card-body">
+            <h5 class="card-title">Account & Profile</h5>
+            <p class="card-text">Update your contact info, change passwords, and manage subscription plans from the dashboard.</p>
+            <a href="{% url 'user-dashboard' %}" class="card-link">Go to dashboard</a>
+          </div>
+        </div>
+        <div class="card shadow-sm border-0 hover-card">
+          <div class="card-body">
+            <h5 class="card-title">Posting jobs</h5>
+            <p class="card-text">Need help crafting a job listing? Review our job posting tips or drop us a note for hands-on support.</p>
+            <a href="{% url 'post_job' %}" class="card-link">Post a job</a>
+          </div>
+        </div>
+        <div class="card shadow-sm border-0 hover-card">
+          <div class="card-body">
+            <h5 class="card-title">Contact support</h5>
+            <p class="card-text">Still stuck? We respond within one business day.</p>
+            <a href="{% url 'contact' %}" class="card-link">Contact us</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -10,6 +10,7 @@ from django.urls import reverse
 from jobs.models import Job, JobApplication
 from userprofile.models import UserProfile
 
+TOP_CITY_NAMES = ["Uttara", "Mirpur", "Banani", "Dhanmondi", "Gulshan", "Motijheel"]
 
 def _page_context(request):
     embed_mode = request.GET.get("embed") == "1"
@@ -20,6 +21,7 @@ def home(request):
     if request.user.is_authenticated and not request.user.is_staff:
         return redirect('user-dashboard')
     base_jobs = Job.objects.filter(status=Job.Status.APPROVED).select_related("poster").order_by("-created_at")
+    location_filter = request.GET.get("location", "").strip()
     profile = None
     if request.user.is_authenticated:
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -32,8 +34,24 @@ def home(request):
         )
     else:
         jobs = base_jobs
+    active_location = None
+    if location_filter:
+        jobs = jobs.filter(location__icontains=location_filter)
+        active_location = location_filter
     apply_profile = profile or SimpleNamespace(has_active_subscription=False, wallet_balance=0)
-    featured_jobs = jobs[:6]
+    all_locations = [
+        (loc or "").lower()
+        for loc in Job.objects.filter(status=Job.Status.APPROVED).values_list("location", flat=True)
+        if loc
+    ]
+    top_cities = [
+        {
+            "name": city,
+            "has_jobs": any(city.lower() in location for location in all_locations),
+        }
+        for city in TOP_CITY_NAMES
+    ]
+    featured_jobs = base_jobs[:6]
     stats = {
         "total_users": get_user_model().objects.count(),
         "total_jobs": Job.objects.filter(status=Job.Status.APPROVED).count(),
@@ -45,6 +63,8 @@ def home(request):
         "profile": profile,
         "apply_profile": apply_profile,
         "apply_redirect_path": reverse('job_list'),
+        "top_cities": top_cities,
+        "active_location": active_location,
         **stats,
     }
     return render(request, 'pages/home.html', context)
@@ -117,3 +137,19 @@ def contact(request):
                 context["form_data"] = {"user_name": "", "user_email": "", "message": ""}
 
     return render(request, 'pages/contact.html', context)
+
+
+def privacy_policy(request):
+    return render(request, 'pages/privacy.html', _page_context(request))
+
+
+def terms_and_conditions(request):
+    return render(request, 'pages/terms.html', _page_context(request))
+
+
+def faqs(request):
+    return render(request, 'pages/faqs.html', _page_context(request))
+
+
+def help_center(request):
+    return render(request, 'pages/help_center.html', _page_context(request))

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <h1 class="mb-4">Privacy Policy</h1>
+      <p class="text-muted">Effective date: {{ now|date:"F d, Y" }}</p>
+      <p>We value your privacy. This policy explains what data we collect, why we collect it, and how we keep it safe. JobFlick only stores the information necessary to provide hiring services and never sells personal data to third parties.</p>
+      <h4 class="mt-4">Information we collect</h4>
+      <ul>
+        <li>Account details such as your name, email, and phone number.</li>
+        <li>Job posts, applications, and messages shared through the platform.</li>
+        <li>Technical data like IP address and browser information for security.</li>
+      </ul>
+      <h4 class="mt-4">How we use your information</h4>
+      <p>We use your data to deliver platform features, send important notifications, prevent fraud, and improve JobFlick. Access is restricted to authorized staff and protected with encryption.</p>
+      <h4 class="mt-4">Your choices</h4>
+      <p>You can update or delete your profile anytime, unsubscribe from marketing emails, or request a complete data export by contacting us at <a href="mailto:jobflick0@gmail.com">jobflick0@gmail.com</a>.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

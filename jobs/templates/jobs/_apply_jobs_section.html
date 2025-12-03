@@ -1,7 +1,7 @@
 {% comment %}Shared Apply Jobs section used on job_list and homepage{% endcomment %}
 {% if show_heading|default:True %}
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="h4 mb-0">Open Roles</h2>
+    <h2 class="h4 mb-0 text-center flex-grow-1">Recent Job Posts</h2>
     {% if request.user.is_authenticated %}
       {% if apply_profile.has_active_subscription %}
         <a class="btn btn-primary btn-sm" href="{% url 'post_job' %}">Post a Job</a>
@@ -14,25 +14,33 @@
   </div>
 {% endif %}
 {% if show_subscription_alerts|default:True %}
-  {% if request.user.is_authenticated %}
-    {% if not apply_profile.has_active_subscription %}
-      <div class="alert alert-warning" role="alert">
-        You can browse roles, but posting or applying requires an active subscription. Use your wallet balance of {{ apply_profile.wallet_balance }} BDT to purchase a plan.
-        <a class="ml-2" href="{% url 'userprofile-subscription' %}">View plans</a>.
-      </div>
-    {% endif %}
-  {% else %}
-    <div class="alert alert-info" role="alert">
-      Sign in to apply, track status, or activate a subscription. You'll be redirected back to this list instantly.
+  {% if request.user.is_authenticated and not apply_profile.has_active_subscription %}
+    <div class="alert alert-warning" role="alert">
+      You can browse roles, but posting or applying requires an active subscription. Use your wallet balance of {{ apply_profile.wallet_balance }} BDT to purchase a plan.
+      <a class="ml-2" href="{% url 'userprofile-subscription' %}">View plans</a>.
     </div>
   {% endif %}
+{% endif %}
+{% if active_location or active_category %}
+  <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert">
+    <div>
+      {% if active_location %}
+        Showing jobs in <strong>{{ active_location }}</strong>
+        {% if active_category %}<br>{% endif %}
+      {% endif %}
+      {% if active_category %}
+        Filtering by <strong>{{ active_category }}</strong> roles
+      {% endif %}
+    </div>
+    <a class="btn btn-sm btn-outline-primary" href="{{ clear_filters_url|default:request.path }}">Clear filter</a>
+  </div>
 {% endif %}
 {% if jobs %}
   <div class="row">
     {% for job in jobs %}
     {% with application=job.app_for_user|first %}
     <div class="col-md-6 mb-3">
-      <div class="card h-100 shadow-sm">
+      <div class="card h-100 shadow-sm hover-card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="card-title mb-0">{{ job.work_title }}</h5>
@@ -92,7 +100,19 @@
   </div>
 {% else %}
   <div class="text-center py-5 bg-light rounded">
-    <h5 class="mb-2">No job posted yet</h5>
-    <p class="text-muted">Be the first to create an opportunity.</p>
+    {% if active_location and not active_category %}
+      <h5 class="mb-2">No recent job posts in {{ active_location }}</h5>
+      <p class="text-muted mb-3">Try another city or clear the filter to see every opening.</p>
+    {% elif active_category and not active_location %}
+      <h5 class="mb-2">No recent {{ active_category }} roles available</h5>
+      <p class="text-muted mb-3">Adjust the category or clear the filter to view all listings.</p>
+    {% elif active_category and active_location %}
+      <h5 class="mb-2">No recent {{ active_category }} roles in {{ active_location }}</h5>
+      <p class="text-muted mb-3">Try changing the location or category filter.</p>
+    {% else %}
+      <h5 class="mb-2">No job posted yet</h5>
+      <p class="text-muted">Be the first to create an opportunity.</p>
+    {% endif %}
+    <a class="btn btn-outline-primary" href="{{ clear_filters_url|default:request.path }}">View all jobs</a>
   </div>
 {% endif %}

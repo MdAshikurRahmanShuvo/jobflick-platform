@@ -22,7 +22,7 @@
         <a class="nav-link" href="{% url 'post_job' %}">Post a Job</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Find CVs</a>
+        <a class="nav-link" href="{% url 'job_list' %}">Apply for Jobs</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{% url 'about' %}">About Us</a>
@@ -33,8 +33,8 @@
     </ul>
 
     <!-- Search Form -->
-    <form class="form-inline my-2 my-lg-0 mr-3">
-      <input class="form-control mr-sm-2" type="search" placeholder="Search">
+    <form class="form-inline my-2 my-lg-0 mr-3" method="get" action="{% url 'home' %}">
+      <input class="form-control mr-sm-2" name="location" type="search" placeholder="Search location" value="{{ request.GET.location|default:'' }}">
       <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
     </form>
 
