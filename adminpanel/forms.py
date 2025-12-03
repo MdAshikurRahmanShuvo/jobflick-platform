@@ -2,7 +2,9 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
-from .models import Transaction
+from jobs.models import Job
+from payments.models import WalletTransaction
+from payments.services import apply_wallet_transaction
 
 
 class AdminLoginForm(forms.Form):
@@ -28,13 +30,42 @@ class AdminLoginForm(forms.Form):
         return cleaned_data
 
 
-class TransactionForm(forms.ModelForm):
-    class Meta:
-        model = Transaction
-        fields = ["recipient", "job", "amount", "note"]
-        widgets = {
-            "recipient": forms.Select(attrs={"class": "form-control"}),
-            "job": forms.Select(attrs={"class": "form-control"}),
-            "amount": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),
-            "note": forms.TextInput(attrs={"class": "form-control", "placeholder": "Payment details"}),
-        }
+class WalletAdjustmentForm(forms.Form):
+    recipient = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    job = forms.ModelChoiceField(
+        queryset=Job.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    direction = forms.ChoiceField(
+        choices=WalletTransaction.Direction.choices,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    category = forms.ChoiceField(
+        choices=WalletTransaction.Category.choices,
+        initial=WalletTransaction.Category.PAYOUT,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    amount = forms.IntegerField(
+        min_value=1,
+        widget=forms.NumberInput(attrs={"class": "form-control", "min": "1"}),
+    )
+    note = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Optional note"}),
+    )
+
+    def process(self, *, admin_user):
+        cleaned = self.cleaned_data
+        return apply_wallet_transaction(
+            user=cleaned["recipient"],
+            amount=cleaned["amount"],
+            direction=cleaned["direction"],
+            category=cleaned["category"],
+            note=cleaned["note"],
+            job=cleaned.get("job"),
+            initiated_by=admin_user,
+        )

@@ -10,9 +10,11 @@ from django.views.decorators.http import require_POST
 
 from jobs.models import Job, JobApplication
 from userprofile.models import Notification, UserProfile
+from payments.models import PlatformWallet, WalletTransaction
+from payments.services import InsufficientBalanceError, mark_transaction_completed
 
-from .forms import AdminLoginForm, TransactionForm
-from .models import SubscriptionLedgerEntry, Transaction
+from .forms import AdminLoginForm, WalletAdjustmentForm
+from .models import SubscriptionLedgerEntry
 
 
 ADMIN_SESSION_KEY = "adminpanel_user_id"
@@ -124,14 +126,31 @@ def dashboard_view(request):
 			.order_by("-created_at")
 		)
 	elif section == "transactions":
-		transactions = Transaction.objects.select_related("recipient", "job").order_by("-created_at")
-		aggregates = transactions.aggregate(total_amount=Sum("amount"))
+		transactions = (
+			WalletTransaction.objects.select_related("user", "initiated_by", "job")
+			.order_by("-created_at")
+		)
+		payout_total = (
+			transactions.filter(
+				direction=WalletTransaction.Direction.JOBFLICK_TO_USER,
+				status=WalletTransaction.Status.COMPLETED,
+			).aggregate(total_amount=Sum("amount"))
+		)
+		collection_total = (
+			transactions.filter(
+				direction=WalletTransaction.Direction.USER_TO_JOBFLICK,
+				status=WalletTransaction.Status.COMPLETED,
+			).aggregate(total_amount=Sum("amount"))
+		)
 		subscription_total = SubscriptionLedgerEntry.objects.aggregate(total_amount=Sum("amount"))
 		context.update(
 			{
 				"transactions": transactions,
-				"total_amount": aggregates.get("total_amount") or 0,
+				"payout_total": payout_total.get("total_amount") or 0,
+				"collection_total": collection_total.get("total_amount") or 0,
 				"subscription_total": subscription_total.get("total_amount") or 0,
+				"platform_balance": PlatformWallet.current_balance(),
+				"wallet_form": WalletAdjustmentForm(),
 			}
 		)
 	elif section == "subscribers":
@@ -257,10 +276,14 @@ def handle_job_post_status(request, job_id):
 @staff_required
 @require_POST
 def create_transaction(request):
-	form = TransactionForm(request.POST)
+	form = WalletAdjustmentForm(request.POST)
 	if form.is_valid():
-		form.save()
-		messages.success(request, "Transaction recorded successfully.")
+		try:
+			result = form.process(admin_user=request.admin_user)
+		except InsufficientBalanceError as exc:
+			messages.error(request, str(exc))
+		else:
+			messages.success(request, f"Transaction {result.transaction.reference} recorded.")
 	else:
 		messages.error(request, "Please fix the errors in the transaction form.")
 	return _redirect_to_section("transactions")
@@ -269,11 +292,12 @@ def create_transaction(request):
 @staff_required
 @require_POST
 def mark_transaction_paid(request, pk):
-	transaction = get_object_or_404(Transaction, pk=pk)
-	transaction.status = Transaction.Status.PAID
-	transaction.processed_at = timezone.now()
-	transaction.save(update_fields=["status", "processed_at"])
-	messages.success(request, "Transaction marked as paid.")
+	transaction = get_object_or_404(WalletTransaction, pk=pk)
+	if transaction.status == WalletTransaction.Status.COMPLETED:
+		messages.info(request, "This transaction is already completed.")
+	else:
+		mark_transaction_completed(transaction, acting_user=request.admin_user)
+		messages.success(request, "Transaction marked as completed.")
 	return _redirect_to_section("transactions")
 
 
