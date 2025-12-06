@@ -6,6 +6,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>{% block title %}JobFlick{% endblock %}</title>
     <style>
+        .page-shell {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            width: 100%;
+        }
+
         .hover-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             border: 1px solid rgba(59, 130, 246, 0.1);
@@ -22,12 +29,14 @@
 <body>
 
     {% if not hide_nav %}
-        <header class="container">
+        <header class="page-shell">
             {% include "include/navbar.html" %}
         </header>
     {% endif %}
 
-    <main class="container mt-4">
+    {% block hero %}{% endblock %}
+
+    <main class="page-shell mt-4">
         {% block content %}{% endblock %}
     </main>
 
