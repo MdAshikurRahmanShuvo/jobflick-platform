@@ -6,7 +6,9 @@ from .views import (
     NextAwarePasswordResetView,
     login_view,
     logout_view,
+    resend_otp_view,
     signup_view,
+    verify_otp_view,
 )
 
 urlpatterns = [
@@ -14,6 +16,8 @@ urlpatterns = [
     path('signup/', signup_view, name='signup'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
+    path('verify-otp/', verify_otp_view, name='verify-otp'),
+    path('verify-otp/resend/', resend_otp_view, name='resend-otp'),
 
     # Password Reset Request
     path(

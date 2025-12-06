@@ -3,7 +3,165 @@
 
 {% block title %}Home{% endblock %}
 
+{% block hero %}
+<section class="home-hero page-shell">
+    <div id="homeHeroCarousel" class="carousel slide carousel-fade hero-carousel" data-ride="carousel" data-interval="3000" data-pause="false">
+        <ol class="carousel-indicators">
+            <li data-target="#homeHeroCarousel" data-slide-to="0" class="active"></li>
+            <li data-target="#homeHeroCarousel" data-slide-to="1"></li>
+            <li data-target="#homeHeroCarousel" data-slide-to="2"></li>
+            <li data-target="#homeHeroCarousel" data-slide-to="3"></li>
+            <li data-target="#homeHeroCarousel" data-slide-to="4"></li>
+            <li data-target="#homeHeroCarousel" data-slide-to="5"></li>
+        </ol>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80');">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1600&q=80');">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1600&q=80');">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80');">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=1600&q=80');">
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1600&q=80');">
+                </div>
+            </div>
+        </div>
+        <a class="carousel-control-prev" href="#homeHeroCarousel" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#homeHeroCarousel" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
+    <div class="hero-overlay">
+        <div class="hero-content text-center">
+            <p class="hero-kicker text-uppercase small font-weight-bold mb-2">Short-Term Jobs Near You</p>
+            <h1 class="display-4 mb-3">Find quick gigs in minutes</h1>
+            <p class="lead mb-4">Browse, post, and manage hourly work opportunities with a clean, fast workflow built for students and hustlers.</p>
+            <div class="hero-cta">
+                <a href="{% url 'job_list' %}" class="btn btn-primary btn-lg mr-3">Find Work</a>
+                <a href="{% url 'post_job' %}" class="btn btn-outline-light btn-lg">Post a Job</a>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+.home-hero {
+    margin-top: 1.5rem;
+    padding: 0;
+    position: relative;
+}
+
+.hero-carousel {
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(15, 76, 129, 0.25);
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-slide {
+    min-height: 520px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+}
+
+.hero-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(8, 38, 73, 0.75), rgba(15, 76, 129, 0.35));
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.hero-content {
+    color: #fff;
+    max-width: 640px;
+    padding: 0 1rem;
+    pointer-events: auto;
+    text-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.hero-cta .btn {
+    pointer-events: auto;
+    min-width: 150px;
+}
+
+.hero-kicker {
+    letter-spacing: 0.2em;
+}
+
+.hero-carousel .carousel-indicators li {
+    background-color: rgba(255, 255, 255, 0.7);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin: 0 6px;
+}
+
+.hero-carousel .carousel-indicators .active {
+    background-color: #1a73e8;
+}
+
+@media (max-width: 767px) {
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .hero-slide {
+        min-height: 320px;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<section class="home-intro-heading text-center py-5">
+    <p class="text-uppercase text-primary small font-weight-bold mb-2">Discover Your Edge</p>
+    <h2 class="display-5 mb-3">Tools that keep every job search sharp</h2>
+    <p class="lead text-muted mb-0">We pair trusted employers with actionable insights so you can move from browsing to booking in minutes.</p>
+</section>
+
+<style>
+.home-intro-heading {
+    max-width: 900px;
+    margin: 0 auto 1rem;
+}
+
+.home-intro-heading h2 {
+    font-weight: 700;
+}
+</style>
+
 <style>
 .stats-section {
     padding: 80px 0;
@@ -106,16 +264,6 @@
 }
 
 </style>
-<section class="text-center py-5">
-    <p class="text-uppercase text-primary small font-weight-bold mb-2">Short-Term Jobs Near You</p>
-    <h1 class="display-4 mb-3">Find quick gigs in minutes</h1>
-    <p class="lead text-muted mb-4">Browse, post, and manage hourly work opportunities with a clean, fast workflow built for students and hustlers.</p>
-    <div>
-        <a href="{% url 'job_list' %}" class="btn btn-primary btn-lg mr-2">Find Work</a>
-        <a href="{% url 'post_job' %}" class="btn btn-outline-primary btn-lg">Post a Job</a>
-    </div>
-</section>
-
 <section class="row text-center py-4">
     <div class="col-md-4 mb-3">
         <div class="border rounded-lg p-4 h-100 hover-card">
