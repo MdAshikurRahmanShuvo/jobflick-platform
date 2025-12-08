@@ -1,3 +1,4 @@
+from datetime import timedelta
 from functools import wraps
 
 from django.contrib import messages
@@ -111,7 +112,11 @@ def dashboard_view(request):
 		"admin_user": request.admin_user,
 	}
 	if section == "users":
+		now = timezone.now()
+		start_of_week_date = (now - timedelta(days=now.weekday())).date()
 		context["users"] = User.objects.order_by("-date_joined")
+		context["admins_count"] = User.objects.filter(is_staff=True).count()
+		context["new_users_count"] = User.objects.filter(date_joined__date__gte=start_of_week_date).count()
 	elif section == "jobs":
 		context["jobs"] = Job.objects.select_related("poster").order_by("-created_at")
 	elif section == "post-approvals":

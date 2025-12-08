@@ -1,6 +1,18 @@
 {% extends "adminpanel/layout.html" %}
 
 {% block adminpanel_content %}
+<style>
+  .admin-card { background:#ffffff; border:1px solid #e6ebf5; border-radius:14px; box-shadow:0 12px 30px rgba(15,23,42,0.06); }
+  .admin-card .icon { width:36px; height:36px; border-radius:12px; display:grid; place-items:center; color:#1d4ed8; background:#e0e7ff; font-weight:700; }
+  .pill { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+  .pill-soft { background:#eef2ff; color:#1d4ed8; }
+  .pill-muted { background:#f1f5f9; color:#0f172a; }
+  .avatar-badge { width:36px; height:36px; border-radius:50%; background:#dbeafe; color:#1d4ed8; display:grid; place-items:center; font-weight:700; letter-spacing:0.5px; }
+  .table-clean > :not(caption) > * > * { border:0; } 
+  .table-clean tbody tr { border-bottom:1px solid #eef1f7; }
+  .table-clean tbody tr:last-child { border-bottom:0; }
+  .table-clean tbody tr:hover { background:#f8faff; }
+</style>
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <p class="text-muted small mb-1">Jobflick Admin Panel</p>
@@ -14,32 +26,77 @@
 </div>
 
 {% if section == 'users' %}
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="p-3 admin-card h-100 d-flex align-items-center justify-content-between">
+        <div>
+          <p class="text-muted small mb-1">Total Users</p>
+          <h4 class="mb-0">{{ users|length }}</h4>
+        </div>
+        <div class="icon" aria-hidden="true">👥</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 admin-card h-100 d-flex align-items-center justify-content-between">
+        <div>
+          <p class="text-muted small mb-1">Admins (including you)</p>
+          <h4 class="mb-0">{{ admins_count|default:1 }}</h4>
+        </div>
+        <div class="icon" aria-hidden="true">🔒</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 admin-card h-100 d-flex align-items-center justify-content-between">
+        <div>
+          <p class="text-muted small mb-1">New This Week</p>
+          <h4 class="mb-0">{{ new_users_count|default:0 }}</h4>
+        </div>
+        <div class="icon" aria-hidden="true">✨</div>
+      </div>
+    </div>
+  </div>
   <div class="admin-table-scroll">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle table-clean">
       <thead class="table-light">
         <tr>
-          <th>Username</th>
-          <th>Email</th>
+          <th>User</th>
           <th>Date Joined</th>
+          <th>Last Login</th>
+          <th>Status</th>
           <th class="text-end">Action</th>
         </tr>
       </thead>
       <tbody>
         {% for user in users %}
         <tr>
-          <td>{{ user.username }}</td>
-          <td>{{ user.email }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <div class="avatar-badge text-uppercase">{{ user.username|slice:":1" }}</div>
+              <div>
+                <div class="fw-semibold">{{ user.username }}</div>
+                <a href="mailto:{{ user.email }}" class="text-decoration-none text-muted small">{{ user.email }}</a>
+              </div>
+            </div>
+          </td>
           <td>{{ user.date_joined|date:"M d, Y" }}</td>
+          <td>{{ user.last_login|date:"M d, Y h:i A"|default:"—" }}</td>
+          <td>
+            {% if user.is_superuser %}
+              <span class="pill pill-soft">Admin</span>
+            {% else %}
+              <span class="pill pill-muted">User</span>
+            {% endif %}
+          </td>
           <td class="text-end">
             {% if user != admin_user %}
-            <form method="post" action="{% url 'adminpanel-delete-user' user.id %}">
-              {% csrf_token %}
-              <button class="btn btn-link text-danger p-0" title="Delete" onclick="return confirm('Delete this user?')">
-                <span aria-hidden="true">🗑️</span>
-              </button>
-            </form>
+            <div class="btn-group" role="group">
+              <form method="post" action="{% url 'adminpanel-delete-user' user.id %}" onsubmit="return confirm('Delete this user?');">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </div>
             {% else %}
-            <span class="badge badge-light">You</span>
+            <span class="pill pill-soft">You</span>
             {% endif %}
           </td>
         </tr>
