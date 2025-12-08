@@ -1,29 +1,69 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-<div class="container py-5" style="max-width: 480px;">
-  <div class="card shadow-sm border-0">
-    <div class="card-body p-4">
+<style>
+  .admin-login-bg {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f6f8fb 0%, #eef2f9 100%);
+    display: grid;
+    place-items: center;
+    padding: 32px 16px;
+  }
+  .admin-login-card {
+    max-width: 520px;
+    width: 100%;
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 20px 48px rgba(15,23,42,0.10);
+    overflow: hidden;
+  }
+  .admin-login-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    color: #0f172a;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+  }
+  .admin-login-brand img {
+    height: 40px;
+    width: auto;
+  }
+  .admin-login-subtext { color: #6b7280; }
+  .form-floating label { color: #6b7280; }
+  .form-floating .form-control { border-radius: 12px; }
+  .form-floating .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 0.2rem rgba(59,130,246,0.15); }
+</style>
+
+<div class="admin-login-bg">
+  <div class="admin-login-card">
+    <div class="p-4 p-md-5">
       <div class="text-center mb-4">
-        <h2 class="h4 mb-1">Admin Panel</h2>
-        <p class="text-muted mb-0">Sign in with your staff account</p>
+        <div class="admin-login-brand mb-2">
+          <img src="{% static 'images/logo.png' %}" alt="JobFlick logo">
+          <div>JobFlick Admin</div>
+        </div>
+        <p class="admin-login-subtext mb-0">Sign in with your staff credentials</p>
       </div>
-      <form method="post">
+      <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
         {% if form.non_field_errors %}
           <div class="alert alert-danger">{{ form.non_field_errors.0 }}</div>
         {% endif %}
-        <div class="form-group mb-3">
-          <label for="id_email" class="form-label">Email</label>
+        <div class="form-floating mb-3">
           {{ form.email }}
+          <label for="id_email">Work email</label>
           {% if form.email.errors %}
-          <small class="text-danger">{{ form.email.errors.0 }}</small>
+          <small class="text-danger d-block mt-1">{{ form.email.errors.0 }}</small>
           {% endif %}
         </div>
-        <div class="form-group mb-3">
-          <label for="id_password" class="form-label">Password</label>
+        <div class="form-floating mb-4">
           {{ form.password }}
+          <label for="id_password">Password</label>
           {% if form.password.errors %}
-          <small class="text-danger">{{ form.password.errors.0 }}</small>
+          <small class="text-danger d-block mt-1">{{ form.password.errors.0 }}</small>
           {% endif %}
         </div>
         <button class="btn btn-primary w-100 mb-3" type="submit">Login</button>
