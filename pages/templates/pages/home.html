@@ -463,7 +463,18 @@
 {% endif %}
 
 <section class="mt-5" id="apply-jobs">
-    {% include "jobs/_apply_jobs_section.html" with jobs=job_cards apply_profile=apply_profile show_heading=False show_subscription_alerts=False apply_redirect_path=apply_redirect_path active_location=active_location active_category=None clear_filters_url=request.path %}
+        {% include "jobs/_apply_jobs_section.html" with jobs=job_cards apply_profile=apply_profile show_heading=False show_subscription_alerts=False apply_redirect_path=apply_redirect_path active_location=active_location active_category=None clear_filters_url=request.path %}
+        {% if total_pages > 1 %}
+        <nav class="my-4" aria-label="Jobs pagination">
+            <ul class="pagination justify-content-center">
+                {% for p in page_numbers %}
+                    <li class="page-item {% if p == page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ p }}{% if active_location %}&location={{ active_location|urlencode }}{% endif %}#apply-jobs">{{ p }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
 </section>
 
 <section class="stats-section my-5">

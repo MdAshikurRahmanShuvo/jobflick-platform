@@ -51,6 +51,19 @@ def home(request):
         }
         for city in TOP_CITY_NAMES
     ]
+    page_size = 6
+    page = request.GET.get("page", "1")
+    try:
+        page = max(1, int(page))
+    except ValueError:
+        page = 1
+    total_jobs = jobs.count()
+    total_pages = max(1, (total_jobs + page_size - 1) // page_size)
+    page = min(page, total_pages)
+    start = (page - 1) * page_size
+    stop = page * page_size
+    job_cards = list(jobs[start:stop])
+    page_numbers = range(1, total_pages + 1)
     featured_jobs = base_jobs[:6]
     stats = {
         "total_users": get_user_model().objects.count(),
@@ -60,7 +73,11 @@ def home(request):
     }
     context = {
         "featured_jobs": featured_jobs,
-        "job_cards": jobs,
+        "job_cards": job_cards,
+        "page": page,
+        "page_numbers": page_numbers,
+        "total_pages": total_pages,
+        "total_jobs": total_jobs,
         "profile": profile,
         "apply_profile": apply_profile,
         "apply_redirect_path": reverse('job_list'),
